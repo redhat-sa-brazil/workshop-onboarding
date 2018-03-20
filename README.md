@@ -41,9 +41,19 @@ Etapas:
 
 4 - Editar o arquivo config.yaml com as suas variaveis (Ex: credenciais do google, email, project-id e etc)
 
-5 - Rodar o playbook
+5 - Rodar o playbook de acordo com a tecnologia do workshop
+Para Openshift:
 ansible-playbook create_student_instance.yml
+
+Para Ansible:
+ansible-playbook create_student_instante_ansible.yml
+
+Para subir um OC Cluster UP de Apoio
+ansible-playbook create_clusterup_apoio.yml
+
 PS: Atentar para o nome do aluno unico por workshop. Usar apenas caracteres alfa-numericos.
+
+
 
 ### Todo ###
 

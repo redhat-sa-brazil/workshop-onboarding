@@ -1,0 +1,45 @@
+- name:  Instalada pacote git
+  yum:
+    name: git
+    state: latest
+
+- name:  Instalada pacote docker
+  yum:
+    name: docker
+    state: latest
+
+- name: "Editando docker start script options"
+  lineinfile:
+    path: /etc/sysconfig/docker
+    regexp: "^OPTIONS"
+    line: "OPTIONS='--insecure-registry=172.30.0.0/16 --selinux-enabled --log-opt max-size=1M --log-opt max-file=3'"
+
+- name: Sobe docker
+  service: 
+    name: docker
+    state: started
+
+- name: Instala certificados
+  yum:
+   name: python-rhsm-certificates
+   state: latest
+
+- name:  Copia arquivo OC para /tmp
+  copy:
+    src: "{{ role_path }}/files/oc-3.7.23-linux.tar.gz"
+    dest: "/tmp/oc-3.7.23-linux.tar.gz"
+
+- name: Descompactar oc
+  shell: "cd /tmp; tar -zxvf oc-3.7.23-linux.tar.gz"
+
+- name: Copia oc para /usr/local/bin
+  shell: "cp /tmp/oc /usr/local/bin"
+  become: yes
+
+- name: Clona git oc-cluster-wrapper
+  shell: "mkdir /usr/local/cluster-wrapper; cd /usr/local/cluster-wrapper; git clone https://github.com/openshift-evangelists/oc-cluster-wrapper; echo 'PATH=/usr/local/cluster-wrapper/oc-cluster-wrapper:$PATH' >> $HOME/.bash_profile"
+  become: yes
+
+- name: Salva OC ClusterUP ip no profile
+  shell: "echo 'export OC_CLUSTER_PUBLIC_HOSTNAME={{ inventory_hostname }}' >> $HOME/.bash_profile"
+  become: yes
