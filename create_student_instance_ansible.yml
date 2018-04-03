@@ -145,7 +145,7 @@
     shell: "/usr/local/bin/oc project {{ nome_projeto_openshift }}"
 
   - name: Cria deployment web_workshop
-    shell: "/usr/local/bin/oc new-app TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY={{ url_wetty }} php~https://bitbucket.org/redhatbsb/workshop-php.git  --name=web-{{ user }} "
+    shell: "/usr/local/bin/oc new-app LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY={{ url_wetty }} php~https://bitbucket.org/redhatbsb/workshop-php.git  --name=web-{{ user }} "
 
   - name: Cria rota para acesso ao web-workshop...
     shell: "/usr/local/bin/oc expose svc/web-{{ user }}"
@@ -173,5 +173,5 @@
   become_method: sudo
   remote_user: "{{ hostvars['localhost']['usuario_ssh_gce'] }}"
   roles:
-    - postinstall
+    - postinstall-ansible
 
