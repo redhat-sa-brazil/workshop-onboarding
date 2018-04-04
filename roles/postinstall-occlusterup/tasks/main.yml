@@ -52,3 +52,45 @@
 - name: Sobe OC ClusterUP
   shell: "export PATH=$PATH:/usr/local/bin; /usr/local/cluster-wrapper/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}'"
   become: yes
+
+- name: Login no cluster
+  shell: "/usr/local/bin/oc login -u system:admin"
+  become: yes
+
+- name: Cria projeto workshop-apoio
+  shell: "/usr/local/bin/oc new-project workshop-apoio"
+  become: yes
+
+- name: Da permissoes de anyuid para workshop-apoio
+  shell: "/usr/local/bin/oc adm policy add-scc-to-user anyuid -z default -n workshop-apoio"
+  become: yes
+
+- name: Seleciona projeto workshop-apoio
+  shell: "/usr/local/bin/oc project workshop-apoio"
+  become: yes
+
+- name: Cria deployment Web Instructor
+  shell: "/usr/local/bin/oc new-app php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor/src --name=web-instructor -n workshop-apoio"
+  become: yes
+
+- name: Cria rota para acesso ao web-workshop
+  shell: "/usr/local/bin/oc expose svc/web-instructor -n workshop-apoio"
+  become: yes
+
+- name: Obtem nome da rota
+  shell: "/usr/local/bin/oc get route web-instructor --no-headers -n workshop-apoio | awk '{print $2}'"
+  become: yes
+  register: result_dominio_web_workshop
+
+- name: Envia email com dados para acesso
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "{{ email_remetente }}"
+    password: "{{ senha_email }}"
+    to: "< {{ email_instrutor }} >"
+    subject: "Dados para Workshop Instructor "
+    body: 'Seu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}'
+  delegate_to: localhost
+
+
