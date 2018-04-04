@@ -5,7 +5,7 @@ chave_ssh: /home/luciano/.ssh/gce
 usuario_ssh_gce: luciano
 cluster_openshift: https://35.199.94.134:8443
 nome_projeto_openshift: workshop-bb
-token_openshift: 1N6xaT6BQ63w9P4EHDEBSMIaHyp9WD8zivf7-LrpLyTokenInvalido
+token_openshift: Km8_BvFb6M9VOVWI_Q9zpU3uhER_yfLD2DOrDvaxb-TokenInvalido
 email_remetente: redhatbsb@gmail.com 
 nome_workshop: workshop-ansible-bb
 endereco_tower: https://35.198.12.187

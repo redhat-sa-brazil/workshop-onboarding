@@ -4,17 +4,13 @@
     comment: "Ansible Core"
     uid: 2222
 
+# contribuicao de Jose Ricardo
 - name: Cria diretorio ansible-core
-  file:
-    path: /ansible-core
-    state: directory
-    owner: ansible-core
-
-- name: Cria diretorio ansible-core/templates
   file:
     path: /ansible-core/templates
     state: directory
     owner: ansible-core
+    recurse: yes
 
 - name: "Copiando chaves de ssh privada"
   copy:

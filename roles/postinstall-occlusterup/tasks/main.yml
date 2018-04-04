@@ -8,6 +8,11 @@
     name: docker
     state: latest
 
+- name:  Instalada pacote Screen
+  yum:
+    name: screen
+    state: latest
+
 - name: "Editando docker start script options"
   lineinfile:
     path: /etc/sysconfig/docker
@@ -42,4 +47,8 @@
 
 - name: Salva OC ClusterUP ip no profile
   shell: "echo 'export OC_CLUSTER_PUBLIC_HOSTNAME={{ inventory_hostname }}' >> $HOME/.bash_profile"
+  become: yes
+
+- name: Sobe OC ClusterUP
+  shell: "export PATH=$PATH:/usr/local/bin; /usr/local/cluster-wrapper/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}'"
   become: yes
