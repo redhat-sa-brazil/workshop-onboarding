@@ -31,11 +31,11 @@
 
 - name:  Copia arquivo OC para /tmp
   copy:
-    src: "{{ role_path }}/files/oc-3.7.23-linux.tar.gz"
-    dest: "/tmp/oc-3.7.23-linux.tar.gz"
+    src: "{{ role_path }}/files/oc-3.9.14-linux.tar.gz"
+    dest: "/tmp/oc-3.9.14-linux.tar.gz"
 
 - name: Descompactar oc
-  shell: "cd /tmp; tar -zxvf oc-3.7.23-linux.tar.gz"
+  shell: "cd /tmp; tar -zxvf oc-3.9.14-linux.tar.gz"
 
 - name: Copia oc para /usr/local/bin
   shell: "cp /tmp/oc /usr/local/bin"
