@@ -116,7 +116,7 @@
   become: yes
 
 - name: Cria deployment Web Instructor
-  shell: "/usr/local/bin/oc new-app php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor/src --name=web-instructor -n workshop-apoio || echo 'já existe'"
+  shell: "/usr/local/bin/oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
   become: yes
 
 - name: Cria rota para acesso ao web-workshop
@@ -132,5 +132,6 @@
   shell: "/usr/local/bin/oc new-app --template=mysql-persistent --param=MYSQL_USER=admin --param=MYSQL_DATABASE=workshop --param=MYSQL_PASSWORD=redhat@123 --param=MYSQL_ROOT_PASSWORD=redhat@123 --param=VOLUME_CAPACITY=5Gi -n workshop-apoio || echo 'já existe'"
   become: yes
 
-- name: debug
-  msg: "O link de acesso para seu ambiente do Openshift é: https://{{ inventory_hostname }}:8443 \nSeu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}"
+- name: Imprimindo mensagem de sucesso
+  debug:
+   msg: "O link de acesso para seu ambiente do Openshift é: https://{{ inventory_hostname }}:8443 \nSeu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}"
