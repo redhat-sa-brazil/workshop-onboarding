@@ -8,6 +8,8 @@
     - screen
     - python-rhsm-certificates
     - httpd-tools
+    - nc
+    - net-tools
 
 - name: "adicionando insecure registry"
   lineinfile:
@@ -41,9 +43,15 @@
   shell: "echo 'export OC_CLUSTER_PUBLIC_HOSTNAME={{ inventory_hostname }}' >> $HOME/.bash_profile"
   become: yes
 
+- name: Checa se Cluster ja esta no ar... 
+  shell: "netstat -an | grep 8443 | grep LISTEN | wc -l"
+  register: ocnoar
+
 - name: Sobe OC ClusterUP
   shell: "export PATH=$PATH:/usr/local/bin; /usr/local/cluster-wrapper/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}'"
   become: yes
+#  when: ocnoar == "0"
+  
 
 #- name: Mudar senha do usuario admin
 #  shell: 
@@ -84,9 +92,9 @@
   mail:
     host: smtp.gmail.com
     port: 587
-    username: "{{ username }}"
-    password: "{{ pass }}"
-    to: "<{{email}}>"
+    username: "{{ email_remetente }}"
+    password: "{{ senha_email }}"
+    to: "<{{ email_instrutor }}>"
     subject: "Dados para Workshop Instrutor"
     body: 'O link de acesso para seu ambiente do Openshift é: https://{{ inventory_hostname }}:8443<br>Seu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}'
   delegate_to: localhost
