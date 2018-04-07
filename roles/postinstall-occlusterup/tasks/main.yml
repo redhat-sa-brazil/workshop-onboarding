@@ -1,11 +1,11 @@
-- name:  Instalada pacotes necessários
+- name:  Instala pacotes necessários
   yum:
     name: "{{ item }}"
     state: latest
   with_items:
     - git
     - docker
-    - screen
+    - p7zip
     - python-rhsm-certificates
     - httpd-tools
 
@@ -16,47 +16,99 @@
     line: "OPTIONS='--insecure-registry=172.30.0.0/16 --selinux-enabled --log-opt max-size=1M --log-opt max-file=3'"
 
 - name: Inicia docker
-  service: 
+  service:
     name: docker
     state: started
     enabled: yes
 
-- name:  Copia arquivo OC para /tmp
+- name: Baixa imagens docker
+  shell: docker pull registry.access.redhat.com/openshift3/ose-haproxy-router:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-deployer:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-sti-builder:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-docker-registry:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-web-console:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-pod:v3.9.14 && docker pull registry.access.redhat.com/rhscl/php-71-rhel7 && docker pull registry.access.redhat.com/rhscl/mysql-57-rhel7
+  async: 1000
+  poll: 0
+  register: docker_status
+
+- name: Copia arquivo oc para /tmp
   copy:
-    src: "{{ role_path }}/files/oc-3.9.14-linux.tar.gz"
-    dest: "/tmp/oc-3.9.14-linux.tar.gz"
+    src: "{{ role_path }}/files/oc.7z"
+    dest: "/tmp/oc.7z"
 
-- name: Descompactar oc
-  shell: "cd /tmp; tar -zxvf oc-3.9.14-linux.tar.gz"
-
-- name: Copia oc para /usr/local/bin
-  shell: "cp /tmp/oc /usr/local/bin"
+- name: Descompacta oc e salve na pasta bin
+  shell: "rm -rf /usr/local/bin/oc ; cd /tmp && 7za e oc.7z && mv /tmp/oc /usr/local/bin"
   become: yes
 
 - name: Clona git oc-cluster-wrapper
-  shell: "mkdir /usr/local/cluster-wrapper; cd /usr/local/cluster-wrapper; git clone https://github.com/openshift-evangelists/oc-cluster-wrapper; echo 'PATH=/usr/local/cluster-wrapper/oc-cluster-wrapper:$PATH' >> $HOME/.bash_profile"
+  git:
+    repo: 'https://github.com/openshift-evangelists/oc-cluster-wrapper.git'
+    dest: /usr/local/oc-cluster-wrapper
+    accept_hostkey: yes
+    force: yes
+  become: yes
+
+- name: Atualizar variavel bash_profile
+  shell: "echo 'PATH=/usr/local/oc-cluster-wrapper:$PATH' >> $HOME/.bash_profile"
   become: yes
 
 - name: Salva OC ClusterUP ip no profile
   shell: "echo 'export OC_CLUSTER_PUBLIC_HOSTNAME={{ inventory_hostname }}' >> $HOME/.bash_profile"
   become: yes
 
+- name: 'Docker - check on async task'
+  async_status:
+    jid: "{{ docker_status.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 120
+
 - name: Sobe OC ClusterUP
-  shell: "export PATH=$PATH:/usr/local/bin; /usr/local/cluster-wrapper/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}'"
+  shell: "export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}'"
   become: yes
 
-#- name: Mudar senha do usuario admin
-#  shell: 
+- name: Criar arquivo de senhas
+  shell: htpasswd -b -c /root/.oc/profiles/workshop/config/master/users.htpasswd admin redhat@123
+  become: yes
 
-#- name: Aumenta quantidade de containers do cluster
-#  shell: 
+- name: Altera auth para Local
+  lineinfile:
+    path: /root/.oc/profiles/workshop/config/master/master-config.yaml
+    regexp: 'anypassword'
+    line: '    name: Local'
+    backup: yes
+  become: yes
+
+- name: Altera login para htpasswd
+  lineinfile:
+    path: /root/.oc/profiles/workshop/config/master/master-config.yaml
+    regexp: 'AllowAllPasswordIdentityProvider'
+    line: '      kind: HTPasswdPasswordIdentityProvider'
+    backup: yes
+  become: yes
+
+- name: Configura arquivo htpasswd
+  lineinfile:
+    path: /root/.oc/profiles/workshop/config/master/master-config.yaml
+    insertafter: 'HTPasswdPasswordIdentityProvider'
+    line: '      file: /root/.oc/profiles/workshop/config/master/users.htpasswd'
+    backup: yes
+  become: yes
+
+- name: Aumenta quantidade de pods no cluster
+  blockinfile:
+    path: /root/.oc/profiles/workshop/config/node-localhost/node-config.yaml
+    insertafter: "kubeletArguments"
+    backup: yes
+    content: |2
+        pods-per-core:
+          - "25"
+        max-pods:
+          - "50"
+  become: yes
 
 - name: Login no cluster
   shell: "/usr/local/bin/oc login -u system:admin"
   become: yes
 
 - name: Cria projeto workshop-apoio
-  shell: "/usr/local/bin/oc adm new-project workshop-apoio --admin=admin"
+  shell: "/usr/local/bin/oc adm new-project workshop-apoio --admin=admin || echo 'já existe'"
   become: yes
 
 - name: Da permissoes de anyuid para workshop-apoio
@@ -64,11 +116,11 @@
   become: yes
 
 - name: Cria deployment Web Instructor
-  shell: "/usr/local/bin/oc new-app php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor/src --name=web-instructor -n workshop-apoio"
+  shell: "/usr/local/bin/oc new-app php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor/src --name=web-instructor -n workshop-apoio || echo 'já existe'"
   become: yes
 
 - name: Cria rota para acesso ao web-workshop
-  shell: "/usr/local/bin/oc expose svc/web-instructor -n workshop-apoio"
+  shell: "/usr/local/bin/oc expose svc/web-instructor -n workshop-apoio || echo 'já existe'"
   become: yes
 
 - name: Obtem nome da rota
@@ -77,19 +129,8 @@
   register: result_dominio_web_workshop
 
 - name: Criar banco de dados
-  shell: "/usr/local/bin/oc new-app --template=mysql-persistent --param=MYSQL_USER=admin --param=MYSQL_DATABASE=workshop --param=MYSQL_PASSWORD=redhat@123 --param=MYSQL_ROOT_PASSWORD=redhat@123 --param=VOLUME_CAPACITY=5Gi -n workshop-apoio"
+  shell: "/usr/local/bin/oc new-app --template=mysql-persistent --param=MYSQL_USER=admin --param=MYSQL_DATABASE=workshop --param=MYSQL_PASSWORD=redhat@123 --param=MYSQL_ROOT_PASSWORD=redhat@123 --param=VOLUME_CAPACITY=5Gi -n workshop-apoio || echo 'já existe'"
   become: yes
 
-- name: Envia email com dados para acesso
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: "{{ username }}"
-    password: "{{ pass }}"
-    to: "<{{email}}>"
-    subject: "Dados para Workshop Instrutor"
-    body: 'O link de acesso para seu ambiente do Openshift é: https://{{ inventory_hostname }}:8443<br>Seu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}'
-  delegate_to: localhost
-  become: yes
-
-
+- name: debug
+  msg: "O link de acesso para seu ambiente do Openshift é: https://{{ inventory_hostname }}:8443 \nSeu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}"
