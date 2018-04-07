@@ -126,19 +126,19 @@
     with_items: "{{ gce_node.instance_data }}"
 
   - name: Login no cluster Openshift
-    shell: "/usr/local/bin/oc login {{ cluster_openshift }} --token={{ token_openshift }} --insecure-skip-tls-verify"
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc login {{ cluster_openshift }} --token={{ token_openshift }} --insecure-skip-tls-verify"
 
   - name: Escolhe projeto
-    shell: "/usr/local/bin/oc project {{ nome_projeto_openshift }}"
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc project {{ nome_projeto_openshift }}"
 
   - name: Cria deployment web_workshop
-    shell: "/usr/local/bin/oc new-app LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY={{ url_wetty }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src --name=web-{{ user }} "
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY={{ url_wetty }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src --name=web-{{ user }} "
 
   - name: Cria rota para acesso ao web-workshop...
-    shell: "/usr/local/bin/oc expose svc/web-{{ user }}"
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc expose svc/web-{{ user }}"
 
   - name: Obtem nome da rota
-    shell: "/usr/local/bin/oc get route web-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc get route web-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
     register: result_dominio_web_workshop
 
   - name: Envia email com dados para acesso
