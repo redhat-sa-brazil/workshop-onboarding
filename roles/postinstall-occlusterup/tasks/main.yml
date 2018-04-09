@@ -128,6 +128,20 @@
   become: yes
   register: result_dominio_web_workshop
 
+
+- name: Cria deployment Wetty Terminal
+  shell: "/usr/local/bin/oc new-app lasher/wetty-single --name=wetty -n workshop-apoio || echo 'já existe'"
+  become: yes
+
+- name: Cria rota para acesso ao wetty
+  shell: "/usr/local/bin/oc expose svc/wetty -n workshop-apoio || echo 'já existe'"
+  become: yes
+
+- name: Obtem nome da rota
+  shell: "/usr/local/bin/oc get route wetty --no-headers -n workshop-apoio | awk '{print $2}'"
+  become: yes
+  register: result_dominio_wetty
+
 - name: Criar banco de dados
   shell: "/usr/local/bin/oc new-app --template=mysql-persistent --param=MYSQL_USER=admin --param=MYSQL_DATABASE=workshop --param=MYSQL_PASSWORD=redhat@123 --param=MYSQL_ROOT_PASSWORD=redhat@123 --param=VOLUME_CAPACITY=5Gi -n workshop-apoio || echo 'já existe'"
   become: yes

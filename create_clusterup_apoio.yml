@@ -15,13 +15,13 @@
     node1_private_ip: ""
     user: instrutor
 
-  vars_prompt:
-  - name: "senha_email"
-    prompt: "Digite a senha de seu email gmail"
-    private: yes
-  - name: "email_instrutor"
-    prompt: "Qual o seu email?"
-    private: no
+#  vars_prompt:
+#  - name: "senha_email"
+#    prompt: "Digite a senha de seu email gmail"
+#    private: yes
+#  - name: "email_instrutor"
+#    prompt: "Qual o seu email?"
+#    private: no
 
 
   tasks:
