@@ -146,6 +146,14 @@
   shell: "/usr/local/bin/oc new-app --template=mysql-persistent --param=MYSQL_USER=admin --param=MYSQL_DATABASE=workshop --param=MYSQL_PASSWORD=redhat@123 --param=MYSQL_ROOT_PASSWORD=redhat@123 --param=VOLUME_CAPACITY=5Gi -n workshop-apoio || echo 'já existe'"
   become: yes
 
+- name: Cria projeto workshop-alunos
+  shell: "/usr/local/bin/oc adm new-project workshop-alunos --admin=admin || echo 'já existe'"
+  become: yes
+
+- name: Da permissoes de anyuid para workshop-apoio
+  shell: "/usr/local/bin/oc adm policy add-scc-to-user anyuid -z default -n workshop-alunos"
+  become: yes
+
 - name: Imprimindo mensagem de sucesso
   debug:
    msg: "O link de acesso para seu ambiente do Openshift é: https://{{ inventory_hostname }}:8443 \nSeu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}"
