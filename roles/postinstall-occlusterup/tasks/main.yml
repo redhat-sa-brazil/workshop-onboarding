@@ -27,13 +27,21 @@
   poll: 0
   register: docker_status
 
-- name: Copia arquivo oc para /tmp
-  copy:
-    src: "{{ role_path }}/files/oc.7z"
-    dest: "/tmp/oc.7z"
+- name: Clona git onboarding app
+  git:
+    repo: 'https://github.com/redhat-sa-brazil/workshop-onboarding'
+    dest: /tmp/onboarding-app
+    accept_hostkey: yes
+    force: yes
+  become: yes
+
+# - name: Copia arquivo oc para /tmp
+#   copy:
+#     src: "{{ role_path }}/files/oc.7z"
+#     dest: "/tmp/oc.7z"
 
 - name: Descompacta oc e salve na pasta bin
-  shell: "rm -rf /usr/local/bin/oc ; cd /tmp && 7za e oc.7z && mv /tmp/oc /usr/local/bin"
+  shell: "rm -rf /usr/local/bin/oc ; cd /tmp/onboarding-app/roles/postinstall-occlusterup/files && 7za e oc.7z && mv /tmp/onboarding-app/roles/postinstall-occlusterup/files/oc /usr/local/bin"
   become: yes
 
 - name: Clona git oc-cluster-wrapper
@@ -107,6 +115,14 @@
   shell: "/usr/local/bin/oc login -u system:admin"
   become: yes
 
+- name: Importa template do xpaas
+  shell: "/usr/local/bin/oc create -f {{item}} -n openshift"
+  with_items:
+    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/fis-image-streams.json
+    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/jboss-image-streams.json
+    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-templates/datagrid71-basic.json
+  become: yes
+
 - name: Cria projeto workshop-apoio
   shell: "/usr/local/bin/oc adm new-project workshop-apoio --admin=admin || echo 'já existe'"
   become: yes
@@ -127,7 +143,6 @@
   shell: "/usr/local/bin/oc get route wetty --no-headers -n workshop-apoio | awk '{print $2}'"
   become: yes
   register: result_dominio_wetty
-
 
 - name: Cria deployment Web Instructor
   shell: "/usr/local/bin/oc new-app  URL_WETTY=http://{{ result_dominio_wetty.stdout }} CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
@@ -152,6 +167,26 @@
 
 - name: Da permissoes de anyuid para workshop-apoio
   shell: "/usr/local/bin/oc adm policy add-scc-to-user anyuid -z default -n workshop-alunos"
+  become: yes
+
+- name: Cria aplicação do sorteio
+  shell: "/usr/local/bin/oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-sorteio --image-stream=fis-java-openshift:2.0 --name=sorteio -n workshop-apoio"
+  become: yes
+
+- name: Cria rota para acesso ao sorteio
+  shell: "/usr/local/bin/oc expose svc/sorteio -n workshop-apoio || echo 'já existe'"
+  become: yes
+
+- name: Pause dc triggers
+  shell: "/usr/local/bin/oc rollout pause dc sorteio -n workshop-apoio"
+  become: yes
+
+- name: Altera limite de cpu e memoria
+  shell: "/usr/local/bin/oc set resources dc sorteio --limits=cpu=400m,memory=250Mi -n workshop-apoio"
+  become: yes
+
+- name: Resume dc triggers
+  shell: "/usr/local/bin/oc rollout resume dc sorteio -n workshop-apoio"
   become: yes
 
 - name: Imprimindo mensagem de sucesso
