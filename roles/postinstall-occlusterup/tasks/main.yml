@@ -99,6 +99,14 @@
 #    backup: yes
 #  become: yes
 
+- name: Espera por Oc Cluster UP no ar...
+  wait_for:
+    delay: 1
+    host: "localhost"
+    port: 8443
+    state: started
+    timeout: 30
+
 - name: Aumenta quantidade de pods no cluster
   blockinfile:
     path: /root/.oc/profiles/workshop/config/node-localhost/node-config.yaml
