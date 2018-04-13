@@ -114,9 +114,9 @@
     backup: yes
     content: |2
         pods-per-core:
-          - "25"
-        max-pods:
           - "50"
+        max-pods:
+          - "100"
   become: yes
 
 - name: Login no cluster
