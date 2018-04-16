@@ -123,6 +123,29 @@
   shell: "/usr/local/bin/oc login -u admin -p qualquersenha"
   become: yes
 
+#- name: Cria SA para geracao de token
+#  shell: "/usr/local/bin/oc create serviceaccount monitoring -n openshift-infra"
+#  become: yes
+
+#- name: Da permissao de cluster-admin para usuario do token
+#  shell: "/usr/local/bin/oc adm policy add-cluster-role-to-user cluster-admin monitoring -z monitoring"
+#  become: yes
+
+#- name: Obtem nome do token
+#  shell: "/usr/local/bin/oc describe sa monitoring -n openshift-infra | grep Tokens | awk {'print $2'}"
+#  become: yes
+#  register: nome_token
+
+#- name: Obtem Token
+#  shell: "/usr/local/bin/oc describe secret {{ nome_token.stdout }} -n openshift-infra | grep token: | awk {'print $2'}"
+#  become: yes
+#  register: token
+
+- name: Obtem Token
+  shell: "/usr/local/bin/oc whoami --show-token=true"
+  become: yes
+  register: token
+
 - name: Importa template do xpaas
   shell: "/usr/local/bin/oc create -f {{item}} -n openshift"
   with_items:
@@ -152,8 +175,19 @@
   become: yes
   register: result_dominio_wetty
 
+- name: Cria diretorio workshop-stuff
+  file: 
+   path: /workshop-stuff
+   state: directory
+   mode: 0775
+
+- name: Salva conteudo de variavel em arquivo
+  copy:
+   src: "{{ credentials_file }}"
+   dest: "/workshop-stuff/conteudo_json_gce.json"
+
 - name: Cria deployment Web Instructor
-  shell: "/usr/local/bin/oc new-app  URL_WETTY=http://{{ result_dominio_wetty.stdout }} CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
+  shell: "/usr/local/bin/oc new-app  URL_WETTY=http://{{ result_dominio_wetty.stdout }} CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
   become: yes
 
 - name: Cria rota para acesso ao web-workshop

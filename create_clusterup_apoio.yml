@@ -88,6 +88,7 @@
   vars:
    ansible_ssh_private_key_file: "{{ hostvars['localhost']['chave_ssh'] }}"
    credentials_file: "{{ hostvars['localhost']['credentials_file_json'] }}"
+   conteudo_json: "{{ lookup(\"file\", \"{{ hostvars['localhost']['credentials_file_json'] }}\") }}"
   hosts: gce_instances_ips
   become: yes
   become_method: sudo
