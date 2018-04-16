@@ -81,11 +81,13 @@
     set_fact: 
       chave_ssh: "{{ chave_ssh }}"
       usuario_ssh_gce: "{{ usuario_ssh_gce }}"
+      credentials_file_json: "{{ credentials_file }}"
 
 
 - name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
   vars:
    ansible_ssh_private_key_file: "{{ hostvars['localhost']['chave_ssh'] }}"
+   credentials_file: "{{ hostvars['localhost']['credentials_file_json'] }}"
   hosts: gce_instances_ips
   become: yes
   become_method: sudo

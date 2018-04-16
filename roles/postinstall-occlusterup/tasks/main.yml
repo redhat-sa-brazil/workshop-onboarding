@@ -99,13 +99,13 @@
 #    backup: yes
 #  become: yes
 
-- name: Espera por Oc Cluster UP no ar...
-  wait_for:
-    delay: 1
-    host: "localhost"
-    port: 8443
-    state: started
-    timeout: 30
+- name: Espera por OC Cluster UP no ar...
+  shell: "/usr/local/bin/oc login -u admin -p qualquersenha https://localhost:8443 --insecure-skip-tls-verify=true | grep successful"
+  register: result
+  until: result.stdout.find("Login successful.") != -1
+  retries: 5
+  delay: 10
+  become: yes
 
 - name: Aumenta quantidade de pods no cluster
   blockinfile:
@@ -120,7 +120,7 @@
   become: yes
 
 - name: Login no cluster
-  shell: "/usr/local/bin/oc login -u system:admin"
+  shell: "/usr/local/bin/oc login -u admin -p qualquersenha"
   become: yes
 
 - name: Importa template do xpaas
