@@ -1,9 +1,7 @@
 # ========================
 # Configuracoes essenciais
 # =======================
-service_account_email: conta@projetox.iam.gserviceaccount.com 
 credentials_file: /home/usuario/gce.json
-project_id: projetox 
 chave_ssh: /home/usuario/.ssh/gce
 usuario_ssh_gce: usuario
 email_remetente: contagmail@gmail.com 
@@ -11,6 +9,8 @@ nome_workshop: workshop-openshift
 # ========================
 # Configuracoes Opcionais
 # ========================
+project_id: projetox 
+service_account_email: conta@projetox.iam.gserviceaccount.com 
 cluster_openshift: https://35.198.44.193:8443
 token_openshift: T7Dfu2Er-STDmQM9qqyN6eVpHJ5XvC2tCCfFbM8i7Fc
 nome_projeto_openshift: workshop-alunos
