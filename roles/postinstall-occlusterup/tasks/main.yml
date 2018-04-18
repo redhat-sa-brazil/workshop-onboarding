@@ -98,7 +98,7 @@
   shell: "/usr/local/bin/oc login -u admin -p qualquersenha https://localhost:8443 --insecure-skip-tls-verify=true | grep successful"
   register: result
   until: result.stdout.find("Login successful.") != -1
-  retries: 5
+  retries: 10
   delay: 10
   become: yes
 
@@ -157,6 +157,14 @@
   shell: "/usr/local/bin/oc adm policy add-scc-to-user anyuid -z default -n workshop-apoio"
   become: yes
 
+- name: Instala banco de dados para Etherpad
+  shell: "/usr/local/bin/oc new-app mysql-persistent --param MYSQL_USER=ether --param MYSQL_PASSWORD=ether --param MYSQL_DATABASE=ether --param VOLUME_CAPACITY=1Gi --param MYSQL_VERSION=5.7 --param MEMORY_LIMIT=256Mi --param DATABASE_SERVICE_NAME=mysql-ether -n workshop-apoio"
+  become: yes
+
+- name: Instala Etherpad
+  shell: "/usr/local/bin/oc new-app -f https://raw.githubusercontent.com/luszczynski/docker-openshift-etherpad/master/etherpad-template.yaml -p DB_USER=ether -p DB_PASS=ether -p DB_DBID=ether -p DB_PORT=3306 -p DB_HOST=mysql-ether -p ADMIN_PASSWORD=secret -n workshop-apoio"
+  become: yes
+
 - name: Cria Wetty Terminal (Backup)
   shell: "/usr/local/bin/oc new-app lasher/wetty-single --name=wetty -n workshop-apoio || echo 'já existe'"
   become: yes
@@ -193,8 +201,13 @@
 - name: Cria config map para Instructor
   shell: "/usr/local/bin/oc create configmap instructor-stuff --from-file=/workshop-stuff -n workshop-apoio"
 
+- name: Salva url etherpad
+  shell: "/usr/local/bin/oc get route etherpad --no-headers -n workshop-apoio | awk '{print $2}'"
+  register: result_dominio_etherpad
+  become: yes
+
 - name: Cria deployment Web Instructor
-  shell: "/usr/local/bin/oc new-app  URL_WETTY=http://{{ result_dominio_wetty.stdout }} CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
+  shell: "/usr/local/bin/oc new-app  URL_WETTY=http://{{ result_dominio_wetty.stdout }} CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps ETHERPAD_URL={{result_dominio_etherpad.stdout}} --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
   become: yes
 
 - name: "Anexa o volume de config map"
@@ -240,14 +253,6 @@
 - name: Resume dc triggers
   shell: "/usr/local/bin/oc rollout resume dc sorteio -n workshop-apoio"
   become: yes
-
-- name: Instala banco de dados para Etherpad
-  shell: "/usr/local/bin/oc new-app mysql-persistent --param MYSQL_USER=ether --param MYSQL_PASSWORD=ether --param MYSQL_DATABASE=ether --param VOLUME_CAPACITY=1Gi --param MYSQL_VERSION=5.7 --param MEMORY_LIMIT=256Mi --param DATABASE_SERVICE_NAME=mysql-ether -n workshop-apoio"
-  become: yes
-
-#- name: Instala Etherpad
-#  shell: "/usr/local/bin/oc new-app -f https://raw.githubusercontent.com/luszczynski/docker-openshift-etherpad/master/etherpad-template.yaml -p DB_USER=ether -p DB_PASS=ether -p DB_DBID=ether -p DB_PORT=3306 -p DB_HOST=mysql-ether -p ADMIN_PASSWORD=secret -n workshop-apoio"
-#  become: yes
 
 - name: Imprimindo mensagem de sucesso
   debug:
