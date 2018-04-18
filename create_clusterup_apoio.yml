@@ -14,6 +14,7 @@
     infranode_private_ip: ""
     node1_private_ip: ""
     user: instrutor
+    tmpdata: "{{ lookup('file','{{ credentials_file }}')|from_json }}"
 
 #  vars_prompt:
 #  - name: "senha_email"
@@ -28,6 +29,11 @@
 
   - name: Carregando variaveis de config.yml
     include_vars: config.yml
+
+  - name: Registra variaveis a partir do json
+    set_fact:
+      service_account_email: "{{ tmpdata.client_email }}"
+      project_id: "{{ tmpdata.project_id }}"
 
   - name: "Cria Disco 1 instancia {{ user }}"
     gce_pd:

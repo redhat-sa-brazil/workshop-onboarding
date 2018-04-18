@@ -1,11 +1,11 @@
 # ========================
 # Configuracoes essenciais
 # =======================
-credentials_file: /home/usuario/gce.json
-chave_ssh: /home/usuario/.ssh/gce
-usuario_ssh_gce: usuario
-email_remetente: contagmail@gmail.com 
-nome_workshop: workshop-openshift
+credentials_file: /home/luciano/gce.json
+chave_ssh: /home/luciano/.ssh/gce
+usuario_ssh_gce: luciano
+email_remetente: redhatbsb@gmail.com 
+nome_workshop: workshop-openshift-2
 # ========================
 # Configuracoes Opcionais
 # ========================
