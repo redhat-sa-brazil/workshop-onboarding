@@ -4,7 +4,7 @@
     state: latest
   with_items:
     - git
-    - docker
+    - docker-1.13.1
     - p7zip
     - python-rhsm-certificates
     - httpd-tools
@@ -21,11 +21,11 @@
     state: started
     enabled: yes
 
-- name: Baixa imagens docker
-  shell: docker pull registry.access.redhat.com/openshift3/ose-haproxy-router:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-deployer:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-sti-builder:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-docker-registry:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-web-console:v3.9.14 && docker pull registry.access.redhat.com/openshift3/ose-pod:v3.9.14 && docker pull registry.access.redhat.com/rhscl/php-71-rhel7 && docker pull registry.access.redhat.com/rhscl/mysql-57-rhel7
-  async: 1000
-  poll: 0
-  register: docker_status
+# - name: Baixa imagens docker (async)
+#   shell: docker pull registry.access.redhat.com/openshift3/ose-haproxy-router:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose-deployer:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose-sti-builder:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose-docker-registry:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose-pod:v3.7.42 && docker pull registry.access.redhat.com/rhscl/php-71-rhel7 && docker pull registry.access.redhat.com/rhscl/mysql-57-rhel7
+#   async: 1000
+#   poll: 0
+#   register: docker_status
 
 - name: Clona git onboarding app
   git:
@@ -34,11 +34,6 @@
     accept_hostkey: yes
     force: yes
   become: yes
-
-# - name: Copia arquivo oc para /tmp
-#   copy:
-#     src: "{{ role_path }}/files/oc.7z"
-#     dest: "/tmp/oc.7z"
 
 - name: Descompacta oc e salve na pasta bin
   shell: "rm -rf /usr/local/bin/oc ; cd /tmp/onboarding-app/roles/postinstall-occlusterup/files && 7za e oc.7z && mv /tmp/onboarding-app/roles/postinstall-occlusterup/files/oc /usr/local/bin"
@@ -60,15 +55,15 @@
   shell: "echo 'export OC_CLUSTER_PUBLIC_HOSTNAME={{ inventory_hostname }}' >> $HOME/.bash_profile"
   become: yes
 
-- name: 'Docker - check on async task'
-  async_status:
-    jid: "{{ docker_status.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  retries: 120
+# - name: 'Docker - check on async task'
+#   async_status:
+#     jid: "{{ docker_status.ansible_job_id }}"
+#   register: job_result
+#   until: job_result.finished
+#   retries: 120
 
 - name: Sobe OC ClusterUP
-  shell: "export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}'"
+  shell: "export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}' --version=v3.7.42"
   become: yes
 
 #- name: Criar arquivo de senhas
@@ -162,8 +157,12 @@
   shell: "/usr/local/bin/oc adm policy add-scc-to-user anyuid -z default -n workshop-apoio"
   become: yes
 
-- name: Cria deployment Wetty Terminal
+- name: Cria Wetty Terminal (Backup)
   shell: "/usr/local/bin/oc new-app lasher/wetty-single --name=wetty -n workshop-apoio || echo 'já existe'"
+  become: yes
+
+- name: Scale down wetty
+  shell: "/usr/local/bin/oc scale dc wetty --replicas=0 -n workshop-apoio"
   become: yes
 
 - name: Cria rota para acesso ao wetty
@@ -235,12 +234,20 @@
   become: yes
 
 - name: Altera limite de cpu e memoria
-  shell: "/usr/local/bin/oc set resources dc sorteio --limits=cpu=400m,memory=250Mi -n workshop-apoio"
+  shell: "/usr/local/bin/oc set resources dc sorteio --limits=cpu=400m,memory=350Mi -n workshop-apoio"
   become: yes
 
 - name: Resume dc triggers
   shell: "/usr/local/bin/oc rollout resume dc sorteio -n workshop-apoio"
   become: yes
+
+- name: Instala banco de dados para Etherpad
+  shell: "/usr/local/bin/oc new-app mysql-persistent --param MYSQL_USER=ether --param MYSQL_PASSWORD=ether --param MYSQL_DATABASE=ether --param VOLUME_CAPACITY=1Gi --param MYSQL_VERSION=5.7 --param MEMORY_LIMIT=256Mi --param DATABASE_SERVICE_NAME=mysql-ether -n workshop-apoio"
+  become: yes
+
+#- name: Instala Etherpad
+#  shell: "/usr/local/bin/oc new-app -f https://raw.githubusercontent.com/luszczynski/docker-openshift-etherpad/master/etherpad-template.yaml -p DB_USER=ether -p DB_PASS=ether -p DB_DBID=ether -p DB_PORT=3306 -p DB_HOST=mysql-ether -p ADMIN_PASSWORD=secret -n workshop-apoio"
+#  become: yes
 
 - name: Imprimindo mensagem de sucesso
   debug:
