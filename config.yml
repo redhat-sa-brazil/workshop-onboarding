@@ -1,13 +1,19 @@
-service_account_email: adminwsansible@workshopansiblecoreandtower.iam.gserviceaccount.com 
-credentials_file: /home/luciano/gce.json
-project_id: workshopansiblecoreandtower 
-chave_ssh: /home/luciano/.ssh/gce
-usuario_ssh_gce: luciano
+# ========================
+# Configuracoes essenciais
+# =======================
+service_account_email: conta@projetox.iam.gserviceaccount.com 
+credentials_file: /home/usuario/gce.json
+project_id: projetox 
+chave_ssh: /home/usuario/.ssh/gce
+usuario_ssh_gce: usuario
+email_remetente: contagmail@gmail.com 
+nome_workshop: workshop-openshift
+# ========================
+# Configuracoes Opcionais
+# ========================
 cluster_openshift: https://35.198.44.193:8443
-nome_projeto_openshift: workshop-alunos
 token_openshift: T7Dfu2Er-STDmQM9qqyN6eVpHJ5XvC2tCCfFbM8i7Fc
-email_remetente: redhatbsb@gmail.com 
-nome_workshop: workshop-ansible-bb
+nome_projeto_openshift: workshop-alunos
 endereco_tower: https://35.198.12.187
 url_wetty: http://wetty-single-workshop-apoio.apps.35.199.94.134.nip.io
 link_form_feedback: https://goo.gl/forms/fyZAsS3Eq2H1ZQR93
