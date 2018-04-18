@@ -41,6 +41,7 @@
         service_account_email: "{{ service_account_email }}"
         credentials_file: "{{ credentials_file }}"
         project_id: "{{ project_id }}"
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
         disks:
         - name: "{{ user }}disk01"
           mode: READ_WRITE
