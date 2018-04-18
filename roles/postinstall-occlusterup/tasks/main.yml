@@ -181,14 +181,25 @@
    state: directory
    mode: 0775
 
-- name: Salva conteudo de variavel em arquivo
+- name: Copia json para Instancia
   copy:
    src: "{{ credentials_file }}"
    dest: "/workshop-stuff/conteudo_json_gce.json"
 
+- name: Copia chave ssh para Instancia
+  copy:
+   src: "{{ ansible_ssh_private_key_file }}"
+   dest: "/workshop-stuff/chave_ssh"
+
+- name: Cria config map para Instructor
+  shell: "/usr/local/bin/oc create configmap instructor-stuff --from-file=/workshop-stuff -n workshop-apoio"
+
 - name: Cria deployment Web Instructor
   shell: "/usr/local/bin/oc new-app  URL_WETTY=http://{{ result_dominio_wetty.stdout }} CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
   become: yes
+
+- name: "Anexa o volume de config map"
+  shell: "/usr/local/bin/oc volumes dc/web-instructor --add --mount-path=/etc/ansible/workshop-stuff --configmap-name=instructor-stuff --type=configmap -n workshop-apoio"
 
 - name: Cria rota para acesso ao web-workshop
   shell: "/usr/local/bin/oc expose svc/web-instructor -n workshop-apoio || echo 'já existe'"
