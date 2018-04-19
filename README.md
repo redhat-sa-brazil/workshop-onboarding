@@ -1,8 +1,13 @@
 # Workshop Onboarding #
 
-O Workshop Onboarding é uma plataforma desenhada para facilitar a realização de workshops através de uma aplicação de onboarding.
+O Workshop Onboarding é uma plataforma desenhada para facilitar a realização de workshops através de uma aplicação de onboarding para os estudantes e também para o instrutor.
 
 ![onboarding-diagram](imagens/Onboarding-Diagram.jpeg "Onboarding Diagram")
+
+Dentre os vários recursos criados, duas aplicações merecem um destaque:
+
+* Aplicação de onboarding do aluno
+* Aplicação de onboarding do instrutor
 
 ## Benefícios
 
@@ -12,17 +17,27 @@ O Workshop Onboarding é uma plataforma desenhada para facilitar a realização 
 * Personalização do workshop para cada cliente;
 * Feedback instantâneo;
 * Fácil acesso a documentação dos workshops;
-* Acesso as labs simplificado e sem necessidade de liberação de firewall.
-
+* Acesso as labs simplificado e sem necessidade de liberação de firewall;
+* Facilidade de uso para o instrutor;
+* Métricas de uso do workshops.
 
 ## Como Funciona?
 
-O instrutor executa um playbook que cria os ambientes necessários para execução do test drive:
-1. Cria instância(s) para o aluno na nuvem do google;
-2. Cria container(s) de apoio (Onboarding app);
-3. Envia email com a URL de acesso para a aplicação de onboarding.
+O instrutor executa um playbook que cria uma instância no Google Cloud contendo um cluster do Openshift já com as aplicações necessárias para o funcionamento do test drive. Quando executado, esse playbook:
+1. Cria instancia de servidor virtual no google cloud;
+2. Instala o Openshift nesse servidor virtual;
+3. Instala a aplicação do instrutor;
+4. Instala a aplicação de sorteio;
+5. Instala o wetty (Terminal via Web Console);
+6. Instala o etherpad.
 
-A aplicação de onboarding é composta de:
+Depois de finalizado o playbook, o estudante pode provisionar as suas instâncias no Google Cloud e sua área de trabalho (apps de onboarding do aluno) por meio de um formulário (self service):
+
+![onboarding-diagram](imagens/Selection_389.png "Onboarding Diagram")
+
+Depois de preenchido o formulário, o aluno recebe um email com acesso a aplicação de onboarding do estudante.
+
+Essa aplicação é composta de:
 
 1. Interface Web personalizada para cada estudante
 2. Etherpad dinâmico (baseado no nome do workshop)
@@ -35,59 +50,94 @@ A aplicação de onboarding é composta de:
 ## Pre-requisitos ##
 
 * Conta em Google Cloud Compute Engine;
-* Cluster (ou OC Cluster UP) Openshift de Apoio;
 * Conta Gmail para o envio de e-mail;
-* Binario OC presente na maquina que ira executar o playbook (em /usr/local/bin/oc);
+* Ansible com apache-libcloud;
 * (Opcional) Ansible Tower para o caso de workshops com Ansible Tower.
 
 ## Como utilizar? ###
 Etapas:
 
-1. Criar a conta no Google Cloud
-2. Criar projeto Wetty no Openshift de Apoio
-* É possível utilizar o wetty do Cluster Sas-Brazil presente em http://wetty-rhbrlab-workshop-apoio.apps.paas.rhbrlab.com/. Login workshop, senha workshop.
-![Wetty](imagens/wetty1.png "Login")
+1. Criar a conta no Google Cloud e configurar permissões
 
-3. Copiar a chave publica do usuario workshop para seu projeto no Google.
-![Wetty](imagens/wetty2.png "Login")
-![Wetty](imagens/wetty3.png "Login")
-![Wetty](imagens/wetty4.png "Login")
-![Wetty](imagens/wetty5.png "Login")
-![Wetty](imagens/wetty6.png "Login")
-![Wetty](imagens/wetty7.png "Login")
-![Wetty](imagens/wetty8.png "Login")
-![Wetty](imagens/wetty9.png "Login")
-![Wetty](imagens/wetty10.png "Login")
+![](imagens/01-create-compute-engine.png)
+![](imagens/2-select-project.png)
+![](imagens/3-select-free-trial.png)
+![](imagens/4-trial-data.png)
+![](imagens/5-service-accounts.png)
+![](imagens/6-create-service-account.png)
+![](imagens/7-create-service-account.png)
+![](imagens/8-create-a-JSON.png)
+![](imagens/9-save-JSON.png)
+![](imagens/10-acessar-github-workshop-onboarding.png)
+![](imagens/12-edit-config2.yaml.png)
+2. Copiar a chave pública do seu usuário para seu projeto no Google.
+![](imagens/Selection_396.png)
+![](imagens/wetty3.png)
+![](imagens/wetty4.png)
+![](imagens/wetty5.png)
+![](imagens/wetty6.png)
+![](imagens/wetty7.png)
+![](imagens/wetty8.png)
+![](imagens/wetty9.png)
+![](imagens/wetty10.png)
+![](imagens/17-execute-playbook2.png)
 
-4. Clone esse repo
+3. Clone esse repo
 
 ```
 git clone https://github.com/redhat-sa-brazil/workshop-onboarding.git
 ```
 
-5. Editar o arquivo config.yaml com as suas variaveis (Ex: credenciais do google, email, project-id e etc)
-
-6. Rodar o playbook de acordo com a tecnologia do workshop
-Para Openshift:
+4. Editar o arquivo config.yaml com as suas variaveis (Ex: credenciais do google, email, project-id e etc)
 
 ```
-ansible-playbook create_student_instance_openshift.yml
+credentials_file: /path/para/json_gce/test-drive-openshift-8308925.json
+chave_ssh: /home/user/.ssh/gce_id_rsa
+usuario_ssh_gce: user
+nome_projeto_openshift: workshop
+email_remetente: your-email@gmail.com
 ```
 
-Para Ansible:
-ansible-playbook create_student_instante_ansible.yml
-
-Para subir um OC Cluster UP de Apoio
+5. Rodar o playbook `create_clusterup_apoio.yml`
+```
 ansible-playbook create_clusterup_apoio.yml
+```
 
-PS: Atentar para o nome do aluno unico por workshop. Usar apenas caracteres alfa-numericos.
+6. Configurar dados adicionais por meio aplicação do instrutor.
 
+A URL de acesso é informada assim que o playbook do passo 5 estiver finalizado sua execução.
 
+![](imagens/Selection_392.png)
+
+No meu caso, a URL é `web-instructor-workshop-apoio.apps.35.198.4.118.nip.io`.
+
+Depois de aberto, logue com `admin` e senha `redhat`.
+
+![](imagens/Selection_393.png)
+
+Acesse as configurações gerais:
+![](imagens/Selection_391.png)
+
+Informe os valores necessários conforme explicação abaixo:
+![](imagens/Selection_394.png)
+
+1. Usuário do Google Cloud (ver arquivo config.yml)
+2. Email utilizado para envio das informações de cada estudante 
+3. Senha do email
+4. Link de uma formulário do Google Forms para coleta das avaliações do Workshop. Utilizamos por enquanto esse aqui: https://docs.google.com/forms/d/1avbPS9gCmXl-_CD55mb73Rejf-mDffFc3EsuR9hfsf0
+
+> OBS: O Google Cloud limita a quantidade de vCPUs e IPs por projeto. O valor padrão pode ser visto em `IAM e Admin` -> `Cota`. Confira antes a quantidade de alunos e evite problema com as cotas.
+
+![](imagens/Selection_395.png)
 
 ### Todo ###
 
-* Criacao de playbook para carregar por CSV
-* Criacao de instancias com chaves especificas para cada aluno
-* Adaptar a aplicacao de onboarding para executar em um unico container (a pensar)
-* Acrescentar este Readme com instrucoes para Workshop de Ansible.
-* Utilizar um wetty para cada aluno
+* Acrescentar este README com instruções para Workshop de Ansible;
+* Geração de chave ssh automática;
+* Criar aplicação de perguntas e respostas;
+* Criar aplicação para correção dos laboratórios e desempenho do aluno;
+* Envio de artefatos utilizados por email ao final do test drive;
+* Perguntar senha da app do instrutor no inicio da execução do playbook `create_clusterup_apoio.yml`;
+* Reestruturação em mais roles no playbook `create_clusterup_apoio.yml`;
+* Ajustes/troca do layout/design.
+
