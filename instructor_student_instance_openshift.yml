@@ -99,7 +99,7 @@
     register: result_url_wetty
 
   - name: Cria deployment web_workshop
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src  --name=web-{{ user }} "
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app ETHERPAD_URL={{ etherpad_url }} LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src  --name=web-{{ user }} "
 
 
   - name: Cria rota para acesso ao web-workshop...
