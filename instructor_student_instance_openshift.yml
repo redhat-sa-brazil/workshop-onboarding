@@ -4,7 +4,7 @@
   gather_facts: no
   vars:
     machine_type_node: n1-standard-2
-    zone: southamerica-east1-a
+    zone: us-east1-b
     image: centos-7
     preemptible: true
     tamanho_disco_pequeno: 40
@@ -29,12 +29,24 @@
       credentials_file: "{{ credentials_file }}"
       project_id: "{{ project_id }}"
 
+
+  - name: "Cria ip estatico {{ user }}"
+    gce_eip:
+     service_account_email: "{{ service_account_email }}"
+     credentials_file: "{{ credentials_file }}"
+     project_id: "{{ project_id }}"
+     name: "ip-{{ user }}"
+     region: "{{ zone }}"
+     state: present
+
+
   - name: "Cria Instancia {{ user }}"
     gce:
         instance_names: "{{ user }}"
         machine_type: "{{ machine_type_node }}"
         image: "{{ image }}"
         zone: "{{ zone }}"
+        external_ip: "ip-{{ user }}"
         tags:
          - http-server
          - https-server
