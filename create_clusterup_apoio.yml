@@ -14,7 +14,7 @@
     master_private_ip: ""
     infranode_private_ip: ""
     node1_private_ip: ""
-    user: instrutor2
+    user: instrutor
     tmpdata: "{{ lookup('file','{{ credentials_file }}')|from_json }}"
 
 #  vars_prompt:
