@@ -4,7 +4,8 @@
   gather_facts: no
   vars:
     machine_type_node: n1-standard-4
-    zone: southamerica-east1-a
+    zone: us-east1-a
+    region: us-east1
     image: centos-7
     preemptible: true
     tamanho_disco_pequeno: 40
@@ -13,7 +14,7 @@
     master_private_ip: ""
     infranode_private_ip: ""
     node1_private_ip: ""
-    user: instrutor
+    user: instrutor2
     tmpdata: "{{ lookup('file','{{ credentials_file }}')|from_json }}"
 
 #  vars_prompt:
@@ -35,6 +36,28 @@
       service_account_email: "{{ tmpdata.client_email }}"
       project_id: "{{ tmpdata.project_id }}"
 
+  - name: Ver dados
+    debug: var=tmpdata.project_id
+
+  - name: Cria liberacao porta 80, 443 e 8443
+    gce_net:
+      name: default
+      fwname: "openshift-80443"
+      allowed: tcp:80,443,8443
+      state: "present"
+      service_account_email: "{{ service_account_email }}"
+      credentials_file: "{{ credentials_file }}"
+      project_id: "{{ project_id }}"
+
+  - name: "Cria ip estatico {{ user }}"
+    gce_eip:
+     service_account_email: "{{ service_account_email }}"
+     credentials_file: "{{ credentials_file }}"
+     project_id: "{{ project_id }}"
+     name: "ip-{{ user }}"
+     region: "{{ region }}"
+     state: present
+
   - name: "Cria Disco 1 instancia {{ user }}"
     gce_pd:
       name: "{{ user }}disk01"
@@ -51,6 +74,7 @@
         machine_type: "{{ machine_type_node }}"
         image: "{{ image }}"
         zone: "{{ zone }}"
+        external_ip: "ip-{{ user }}"
         tags:
          - http-server
          - https-server
