@@ -75,7 +75,8 @@
         service_account_email: "{{ service_account_email }}"
         credentials_file: "{{ credentials_file }}"
         project_id: "{{ project_id }}"
-        metadata: '{"sshKeys":"root:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQK+dX349U1PV9qmMvj6DgZnnnTVfkLodRZ0MOBFSCzXYhN4KQMPuom/oJAPPYBpHEbaYOocZRTVIYuPO5u7gwXOx+oazmvhzpmjO6R/ZwiY8X4a07LonuxWhf2ry0cWAIVr06x+5AOuBBrJazdVxwhPYlJC4QEdMMAxtFB+uRU6nhSjPzxVGAbZSNTGvrlasDLcxkQLAsnETEFldopStW/t12udEm5nnBPNi2S9WG2eru5mPKPyug4WkqYxjdBRNCwnKUl5NV9r7GM25SxXpbjf72fFSRSCzOLe3eiC9z6/TFzlSmWjGZRNqGEcbKj3HdLBJZSSIOq3vYX0+EItg/", "ansible-core:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmg6/1H29uMnS/8CpKRFZt+VyjAfYavUL/XZ8SY/3+dlqaC3nvhC9pYFtQ3OcY6q0g/IknhKsH/4LdKj8lMQ+SQKl7WSzS86NmSSAXduN3b8v/mlv1t451f+L0+Eol8556W3Cv9C7VsRL9MKC79TN94oia1ieCdhCbaaqqc9yiH1xBpSukB6Ro2yXCcfqxJWNjocBy9oeGfcgxA/9jIkiTFPDP1YR3Ujng3DQyOdJ+7ogtmtadKR6f057MCvJqGnzlBjipWLDTPkSTKbLIaEgR2KZ7X9+6QgdIAz+LrMsqx+jHkq/xhGZF7IgpyeKchtIyuLnl13J5airyLgE4mwrl"}'
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff
+luciano:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDvMac/KXAzJrtLzGCQaRmHQ6zsmpWH7p04Hgphy/BvKz3Cdbv7cg29Ghtbqi+Z+vsXLnXaPKvX2IUSmHwRgyyMw3syCs7bOAZyp19jOfzMzxBPwW4IA+EGgS2WqlXpgKD14MJvLS1Ri++U1hec2+Ti+HZtKP30352r+NCSkcmGTLSTDa2K9lTMvcSE3W8mPUXtWmjYVwEv6vnR4AijzqnFcO8bRMQqdr18WIp1+dIje56FH/1gJrvXtEgfxNUn6VpefyrTZq7tmpSJ+7HKKdSTF0905i1/QRne4mtZi/9vhxG6GhGJTWzfU+SfGB4Cc7MRcdA9cbWbmnkUkgW+hed"}'
         disks:
         - name: "{{ user }}disk01"
           mode: READ_WRITE
@@ -94,8 +95,9 @@
          - https-server
         service_account_email: "{{ service_account_email }}"
         credentials_file: "{{ credentials_file }}"
-        metadata: '{"sshKeys":"root:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQK+dX349U1PV9qmMvj6DgZnnnTVfkLodRZ0MOBFSCzXYhN4KQMPuom/oJAPPYBpHEbaYOocZRTVIYuPO5u7gwXOx+oazmvhzpmjO6R/ZwiY8X4a07LonuxWhf2ry0cWAIVr06x+5AOuBBrJazdVxwhPYlJC4QEdMMAxtFB+uRU6nhSjPzxVGAbZSNTGvrlasDLcxkQLAsnETEFldopStW/t12udEm5nnBPNi2S9WG2eru5mPKPyug4WkqYxjdBRNCwnKUl5NV9r7GM25SxXpbjf72fFSRSCzOLe3eiC9z6/TFzlSmWjGZRNqGEcbKj3HdLBJZSSIOq3vYX0+EItg/", "ansible-core:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmg6/1H29uMnS/8CpKRFZt+VyjAfYavUL/XZ8SY/3+dlqaC3nvhC9pYFtQ3OcY6q0g/IknhKsH/4LdKj8lMQ+SQKl7WSzS86NmSSAXduN3b8v/mlv1t451f+L0+Eol8556W3Cv9C7VsRL9MKC79TN94oia1ieCdhCbaaqqc9yiH1xBpSukB6Ro2yXCcfqxJWNjocBy9oeGfcgxA/9jIkiTFPDP1YR3Ujng3DQyOdJ+7ogtmtadKR6f057MCvJqGnzlBjipWLDTPkSTKbLIaEgR2KZ7X9+6QgdIAz+LrMsqx+jHkq/xhGZF7IgpyeKchtIyuLnl13J5airyLgE4mwrl"}'
         project_id: "{{ project_id }}"
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff
+luciano:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDvMac/KXAzJrtLzGCQaRmHQ6zsmpWH7p04Hgphy/BvKz3Cdbv7cg29Ghtbqi+Z+vsXLnXaPKvX2IUSmHwRgyyMw3syCs7bOAZyp19jOfzMzxBPwW4IA+EGgS2WqlXpgKD14MJvLS1Ri++U1hec2+Ti+HZtKP30352r+NCSkcmGTLSTDa2K9lTMvcSE3W8mPUXtWmjYVwEv6vnR4AijzqnFcO8bRMQqdr18WIp1+dIje56FH/1gJrvXtEgfxNUn6VpefyrTZq7tmpSJ+7HKKdSTF0905i1/QRne4mtZi/9vhxG6GhGJTWzfU+SfGB4Cc7MRcdA9cbWbmnkUkgW+hed"}'
         disks:
         - name: "{{ user }}disk02"
           mode: READ_WRITE
@@ -113,8 +115,9 @@
          - https-server
         service_account_email: "{{ service_account_email }}"
         credentials_file: "{{ credentials_file }}"
-        metadata: '{"sshKeys":"root:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQK+dX349U1PV9qmMvj6DgZnnnTVfkLodRZ0MOBFSCzXYhN4KQMPuom/oJAPPYBpHEbaYOocZRTVIYuPO5u7gwXOx+oazmvhzpmjO6R/ZwiY8X4a07LonuxWhf2ry0cWAIVr06x+5AOuBBrJazdVxwhPYlJC4QEdMMAxtFB+uRU6nhSjPzxVGAbZSNTGvrlasDLcxkQLAsnETEFldopStW/t12udEm5nnBPNi2S9WG2eru5mPKPyug4WkqYxjdBRNCwnKUl5NV9r7GM25SxXpbjf72fFSRSCzOLe3eiC9z6/TFzlSmWjGZRNqGEcbKj3HdLBJZSSIOq3vYX0+EItg/", "ansible-core:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCmg6/1H29uMnS/8CpKRFZt+VyjAfYavUL/XZ8SY/3+dlqaC3nvhC9pYFtQ3OcY6q0g/IknhKsH/4LdKj8lMQ+SQKl7WSzS86NmSSAXduN3b8v/mlv1t451f+L0+Eol8556W3Cv9C7VsRL9MKC79TN94oia1ieCdhCbaaqqc9yiH1xBpSukB6Ro2yXCcfqxJWNjocBy9oeGfcgxA/9jIkiTFPDP1YR3Ujng3DQyOdJ+7ogtmtadKR6f057MCvJqGnzlBjipWLDTPkSTKbLIaEgR2KZ7X9+6QgdIAz+LrMsqx+jHkq/xhGZF7IgpyeKchtIyuLnl13J5airyLgE4mwrl"}'
         project_id: "{{ project_id }}"
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff
+luciano:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDvMac/KXAzJrtLzGCQaRmHQ6zsmpWH7p04Hgphy/BvKz3Cdbv7cg29Ghtbqi+Z+vsXLnXaPKvX2IUSmHwRgyyMw3syCs7bOAZyp19jOfzMzxBPwW4IA+EGgS2WqlXpgKD14MJvLS1Ri++U1hec2+Ti+HZtKP30352r+NCSkcmGTLSTDa2K9lTMvcSE3W8mPUXtWmjYVwEv6vnR4AijzqnFcO8bRMQqdr18WIp1+dIje56FH/1gJrvXtEgfxNUn6VpefyrTZq7tmpSJ+7HKKdSTF0905i1/QRne4mtZi/9vhxG6GhGJTWzfU+SfGB4Cc7MRcdA9cbWbmnkUkgW+hed"}'
         disks:
         - name: "{{ user }}disk03"
           mode: READ_WRITE
