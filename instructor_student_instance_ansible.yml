@@ -75,8 +75,7 @@
         service_account_email: "{{ service_account_email }}"
         credentials_file: "{{ credentials_file }}"
         project_id: "{{ project_id }}"
-        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff
-luciano:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDvMac/KXAzJrtLzGCQaRmHQ6zsmpWH7p04Hgphy/BvKz3Cdbv7cg29Ghtbqi+Z+vsXLnXaPKvX2IUSmHwRgyyMw3syCs7bOAZyp19jOfzMzxBPwW4IA+EGgS2WqlXpgKD14MJvLS1Ri++U1hec2+Ti+HZtKP30352r+NCSkcmGTLSTDa2K9lTMvcSE3W8mPUXtWmjYVwEv6vnR4AijzqnFcO8bRMQqdr18WIp1+dIje56FH/1gJrvXtEgfxNUn6VpefyrTZq7tmpSJ+7HKKdSTF0905i1/QRne4mtZi/9vhxG6GhGJTWzfU+SfGB4Cc7MRcdA9cbWbmnkUkgW+hed"}'
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
         disks:
         - name: "{{ user }}disk01"
           mode: READ_WRITE
@@ -96,8 +95,7 @@ luciano:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDvMac/KXAzJrtLzGCQaRmHQ6zsmpWH7p0
         service_account_email: "{{ service_account_email }}"
         credentials_file: "{{ credentials_file }}"
         project_id: "{{ project_id }}"
-        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff
-luciano:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDvMac/KXAzJrtLzGCQaRmHQ6zsmpWH7p04Hgphy/BvKz3Cdbv7cg29Ghtbqi+Z+vsXLnXaPKvX2IUSmHwRgyyMw3syCs7bOAZyp19jOfzMzxBPwW4IA+EGgS2WqlXpgKD14MJvLS1Ri++U1hec2+Ti+HZtKP30352r+NCSkcmGTLSTDa2K9lTMvcSE3W8mPUXtWmjYVwEv6vnR4AijzqnFcO8bRMQqdr18WIp1+dIje56FH/1gJrvXtEgfxNUn6VpefyrTZq7tmpSJ+7HKKdSTF0905i1/QRne4mtZi/9vhxG6GhGJTWzfU+SfGB4Cc7MRcdA9cbWbmnkUkgW+hed"}'
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
         disks:
         - name: "{{ user }}disk02"
           mode: READ_WRITE
@@ -116,8 +114,7 @@ luciano:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDvMac/KXAzJrtLzGCQaRmHQ6zsmpWH7p0
         service_account_email: "{{ service_account_email }}"
         credentials_file: "{{ credentials_file }}"
         project_id: "{{ project_id }}"
-        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff
-luciano:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDvMac/KXAzJrtLzGCQaRmHQ6zsmpWH7p04Hgphy/BvKz3Cdbv7cg29Ghtbqi+Z+vsXLnXaPKvX2IUSmHwRgyyMw3syCs7bOAZyp19jOfzMzxBPwW4IA+EGgS2WqlXpgKD14MJvLS1Ri++U1hec2+Ti+HZtKP30352r+NCSkcmGTLSTDa2K9lTMvcSE3W8mPUXtWmjYVwEv6vnR4AijzqnFcO8bRMQqdr18WIp1+dIje56FH/1gJrvXtEgfxNUn6VpefyrTZq7tmpSJ+7HKKdSTF0905i1/QRne4mtZi/9vhxG6GhGJTWzfU+SfGB4Cc7MRcdA9cbWbmnkUkgW+hed"}'
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
         disks:
         - name: "{{ user }}disk03"
           mode: READ_WRITE
@@ -190,11 +187,11 @@ luciano:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDvMac/KXAzJrtLzGCQaRmHQ6zsmpWH7p0
 
 - name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
   vars:
-   ansible_ssh_private_key_file: "{{ hostvars['localhost']['chave_ssh'] }}"
+   ansible_ssh_private_key_file: "/workshop-stuff/workshop_id_rsa"
   hosts: gce_instances_ips
   become: yes
   become_method: sudo
-  remote_user: "{{ hostvars['localhost']['usuario_ssh_gce'] }}"
+  remote_user: "workshop"
   roles:
     - postinstall-ansible
 

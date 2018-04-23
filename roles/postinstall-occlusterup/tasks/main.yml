@@ -199,10 +199,27 @@
    src: "{{ credentials_file }}"
    dest: "/workshop-stuff/conteudo_json_gce.json"
 
+- name: Copia config.yaml para Instancia
+  copy:
+   src: "{{ role_path }}/../../config.yml"
+   dest: "/workshop-stuff/config.yaml"
+
 - name: Copia chave ssh para Instancia
   copy:
    src: "{{ ansible_ssh_private_key_file }}"
    dest: "/workshop-stuff/chave_ssh"
+
+- name: Copia chave privada workshop para instancia
+  copy:
+   src: "{{ role_path }}/files/workshop_id_rsa"
+   dest: "/workshop-stuff/workshop_id_rsa"
+   mode: 0600
+
+- name: Copia chave publica workshop para instancia
+  copy:
+   src: "{{ role_path }}/files/workshop_id_rsa.pub"
+   dest: "/workshop-stuff/workshop_id_rsa.pub"
+   mode: 0600
 
 - name: Cria config map para Instructor
   shell: "/usr/local/bin/oc create configmap instructor-stuff --from-file=/workshop-stuff -n workshop-apoio"
@@ -218,6 +235,9 @@
 
 - name: "Anexa o volume de config map"
   shell: "/usr/local/bin/oc volumes dc/web-instructor --add --mount-path=/etc/ansible/workshop-stuff --configmap-name=instructor-stuff --type=configmap -n workshop-apoio"
+
+- name: Anexa volume no instrutor...
+  shell: "/usr/local/bin/oc volume dc/web-instructor --add --type=persistentVolumeClaim --claim-size=1Gi --mount-path=/workshop-pv -n workshop-apoio"
 
 - name: Cria rota para acesso ao web-workshop
   shell: "/usr/local/bin/oc expose svc/web-instructor -n workshop-apoio || echo 'já existe'"
