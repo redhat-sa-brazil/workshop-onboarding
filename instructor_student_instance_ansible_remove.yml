@@ -1,0 +1,98 @@
+- name: Cria instancias Gcloud Openshift para Workshop
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    machine_type_node: n1-standard-1
+    machine_type_small: g1-small
+    zone: southamerica-east1-a
+    region: southamerica-east1
+    image: centos-7
+    preemptible: false
+    tamanho_disco_pequeno: 40
+    tamanho_disco_grande: 50
+    tamanho_disco_adicional: 50
+    master_private_ip: ""
+    infranode_private_ip: ""
+    node1_private_ip: ""
+
+  tasks:
+
+  - name: Carregando variaveis de config.yml
+    include_vars: config.yml
+
+  - name: Remove Instancia 1
+    gce:
+        instance_names: "{{ user }}"
+        machine_type: "{{ machine_type_node }}"
+        image: "{{ image }}"
+        zone: "{{ zone }}"
+        external_ip: "ip-{{ user }}"
+        preemptible: "{{ preemptible }}"
+        state: "deleted"
+        tags:
+         - http-server
+         - https-server
+        service_account_email: "{{ service_account_email }}"
+        credentials_file: "{{ credentials_file }}"
+        project_id: "{{ project_id }}"
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
+        disks:
+        - name: "{{ user }}disk01"
+          mode: READ_WRITE
+    register: gce_node
+
+
+  - name: "Remove Instancia {{ user }}-server1"
+    gce:
+        instance_names: "{{ user }}-server1"
+        machine_type: "{{ machine_type_small }}"
+        image: "{{ image }}"
+        zone: "{{ zone }}"
+        external_ip: none
+        preemptible: "{{ preemptible }}"
+        state: "deleted"
+        tags:
+         - http-server
+         - https-server
+        service_account_email: "{{ service_account_email }}"
+        credentials_file: "{{ credentials_file }}"
+        project_id: "{{ project_id }}"
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
+        disks:
+        - name: "{{ user }}disk02"
+          mode: READ_WRITE
+
+  - name: "Remove Instancia {{ user }}-server2"
+    gce:
+        instance_names: "{{ user }}-server2"
+        machine_type: "{{ machine_type_small }}"
+        image: "{{ image }}"
+        zone: "{{ zone }}"
+        external_ip: none
+        preemptible: "{{ preemptible }}"
+        state: deleted
+        tags:
+         - http-server
+         - https-server
+        service_account_email: "{{ service_account_email }}"
+        credentials_file: "{{ credentials_file }}"
+        project_id: "{{ project_id }}"
+        metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
+        disks:
+        - name: "{{ user }}disk03"
+          mode: READ_WRITE
+
+  - name: Login no cluster Openshift
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc login {{ cluster_openshift }} --token={{ token_openshift }} --insecure-skip-tls-verify"
+
+  - name: Escolhe projeto
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc project workshop-alunos"
+
+  - name: Remove Web apps
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc delete all -l web-{{ user }} -n workshop-alunos"
+
+  - name: Remove Wetty apps
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc delete all -l wetty-{{ user }} -n workshop-alunos"
+
+
