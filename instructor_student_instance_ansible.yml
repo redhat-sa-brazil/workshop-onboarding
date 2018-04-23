@@ -181,7 +181,7 @@
       first_name: "{{ user }}"
       last_name: "Workshop"
       state: present
-      tower_host: "{{ tower_host }}"
+      tower_host: "{{ endereco_tower }}"
       tower_username: "admin"
       tower_password: "redhat4ever"
       tower_verify_ssl: no
