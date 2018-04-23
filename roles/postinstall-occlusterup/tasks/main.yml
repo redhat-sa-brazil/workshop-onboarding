@@ -188,6 +188,12 @@
    state: directory
    mode: 0775
 
+- name: Cria diretorio workshop-pv
+  file: 
+   path: /workshop-pv
+   state: directory
+   mode: 0777
+
 - name: Copia json para Instancia
   copy:
    src: "{{ credentials_file }}"
@@ -237,22 +243,27 @@
 - name: Cria aplicação do sorteio
   shell: "/usr/local/bin/oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-sorteio --image-stream=fis-java-openshift:2.0 --name=sorteio -n workshop-apoio"
   become: yes
+  ignore_errors: yes
 
 - name: Cria rota para acesso ao sorteio
   shell: "/usr/local/bin/oc expose svc/sorteio -n workshop-apoio || echo 'já existe'"
   become: yes
+  ignore_errors: yes
 
 - name: Pause dc triggers
   shell: "/usr/local/bin/oc rollout pause dc sorteio -n workshop-apoio"
   become: yes
+  ignore_errors: yes
 
 - name: Altera limite de cpu e memoria
   shell: "/usr/local/bin/oc set resources dc sorteio --limits=cpu=400m,memory=350Mi -n workshop-apoio"
   become: yes
+  ignore_errors: yes
 
 - name: Resume dc triggers
   shell: "/usr/local/bin/oc rollout resume dc sorteio -n workshop-apoio"
   become: yes
+  ignore_errors: yes
 
 - name: Imprimindo mensagem de sucesso
   debug:
