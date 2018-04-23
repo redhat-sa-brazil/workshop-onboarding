@@ -1,15 +1,15 @@
-- name:  Cria usuario ansible-core
+- name:  Cria usuario workshop 
   user:
     name: workshop
     comment: "Usuario Workshop"
-    uid: 2222
+  ignore_errors: yes
 
 # contribuicao de Jose Ricardo
 - name: Cria diretorio ansible-core
   file:
     path: /workshop/templates
     state: directory
-    owner: ansible-core
+    owner: workshop 
     recurse: yes
 
 - name: "Copiando chaves de ssh privada"

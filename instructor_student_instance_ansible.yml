@@ -67,7 +67,6 @@
         machine_type: "{{ machine_type_node }}"
         image: "{{ image }}"
         zone: "{{ zone }}"
-	external_ip: "ip-{{ user }}"        
         preemptible: "{{ preemptible }}"
         tags:
          - http-server
@@ -187,7 +186,7 @@
 
 - name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
   vars:
-   ansible_ssh_private_key_file: "/workshop-stuff/workshop_id_rsa"
+   ansible_ssh_private_key_file: "/etc/ansible/workshop-stuff/workshop_id_rsa"
   hosts: gce_instances_ips
   become: yes
   become_method: sudo
