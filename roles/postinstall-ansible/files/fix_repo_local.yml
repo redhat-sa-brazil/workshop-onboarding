@@ -3,7 +3,7 @@
   hosts: all
   become: yes
   vars:
-  remote_user: ansible-core 
+  remote_user: workshop
 
   tasks:
   - name: Remove repositorios originais
@@ -11,5 +11,5 @@
 
   - name: Copia conf para repos local 
     copy:
-      src: /ansible-core/redhat.repo
+      src: /workshop/redhat.repo
       dest: /etc/yum.repos.d/redhat.repo
