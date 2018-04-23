@@ -173,6 +173,19 @@
     shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc get route web-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
     register: result_dominio_web_workshop
 
+  - name: Cria usuario no tower
+    tower_user:
+      username: "{{ user }}"
+      password: "redhat"
+      email: "{{ email_aluno }}"
+      first_name: "{{ user }}"
+      last_name: "Workshop"
+      state: present
+      tower_host: "{{ tower_host }}"
+      tower_username: "admin"
+      tower_password: "redhat4ever"
+      tower_verify_ssl: no
+
   - name: Envia email com dados para acesso
     mail:
       host: smtp.gmail.com
