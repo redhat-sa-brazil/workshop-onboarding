@@ -8,8 +8,14 @@
     - p7zip
     - python-rhsm-certificates
     - httpd-tools
+    - centos-release-openshift-origin37
 
-- name: "adicionando insecure registry"
+- name: Instala oc client
+  yum:
+    name: origin-clients-3.7.0-1.0.7ed6862
+    state: present
+
+- name: Configura insecure registry
   lineinfile:
     path: /etc/sysconfig/docker
     regexp: "^OPTIONS"
@@ -27,19 +33,19 @@
 #   poll: 0
 #   register: docker_status
 
-- name: Clona git onboarding app
-  git:
-    repo: 'https://github.com/redhat-sa-brazil/workshop-onboarding'
-    dest: /tmp/onboarding-app
-    accept_hostkey: yes
-    force: yes
+#- name: Clona git onboarding app
+#  git:
+#    repo: 'https://github.com/redhat-sa-brazil/workshop-onboarding'
+#    dest: /tmp/onboarding-app
+#    accept_hostkey: yes
+#    force: yes
 
-- name: Descompacta oc e salve na pasta bin
-  shell: "rm -rf /usr/local/bin/oc ; cd /tmp/onboarding-app/roles/postinstall-occlusterup/files && 7za e oc.7z && mv /tmp/onboarding-app/roles/postinstall-occlusterup/files/oc /usr/local/bin"
+#- name: Descompacta oc e salve na pasta bin
+#  shell: "rm -rf oc ; cd /tmp/onboarding-app/roles/postinstall-occlusterup/files && 7za e oc.7z && mv /tmp/onboarding-app/roles/postinstall-occlusterup/files/oc /usr/local/bin"
 
 - name: Clona git oc-cluster-wrapper
   git:
-    repo: 'https://github.com/openshift-evangelists/oc-cluster-wrapper.git'
+    repo: 'https://github.com/luszczynski/oc-cluster-wrapper.git'
     dest: /usr/local/oc-cluster-wrapper
     accept_hostkey: yes
     force: yes
@@ -58,7 +64,7 @@
 #   retries: 120
 
 - name: Sobe OC ClusterUP
-  shell: "export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}' --version=v3.7.42"
+  shell: "export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}' --metrics --version=v3.7.0"
 
 #- name: Criar arquivo de senhas
 #  shell: htpasswd -b -c /root/.oc/profiles/workshop/config/master/users.htpasswd admin redhat@123
@@ -89,11 +95,26 @@
 
 
 - name: Espera por OC Cluster UP no ar...
-  shell: "/usr/local/bin/oc login -u admin -p qualquersenha https://localhost:8443 --insecure-skip-tls-verify=true | grep successful"
+  shell: "oc login -u admin -p qualquersenha https://localhost:8443 --insecure-skip-tls-verify=true | grep successful"
   register: result
   until: result.stdout.find("Login successful.") != -1
   retries: 10
   delay: 10
+
+- name: Get Metrics Error Pod
+  shell: oc get pods -n openshift-infra | grep Error | head -n1 | cut -d' ' -f1
+  register: metrics_pod
+  until: metrics_pod.stdout != ""
+  retries: 20
+  delay: 30
+
+- name: Fix Metrics Deployment
+  async: 1000
+  poll: 0
+  register: metrics_status
+  shell: >
+    oc debug "{{ metrics_pod.stdout }}" -n openshift-infra -- /usr/bin/bash -c "sed -i 's/- include: validate_hostnames.yml/#- include: validate_hostnames.yml/' /usr/share/ansible/openshift-ansible/playbooks/common/openshift-cluster/std_include.yml &&  ansible-playbook -i /tmp/inventory playbooks/byo/openshift-cluster/openshift-metrics.yml"
+
 
 - name: Aumenta quantidade de pods no cluster
   blockinfile:
@@ -107,60 +128,60 @@
           - "100"
 
 - name: Login no cluster
-  shell: "/usr/local/bin/oc login -u admin -p qualquersenha"
+  shell: "oc login -u admin -p qualquersenha"
 
 #- name: Cria SA para geracao de token
-#  shell: "/usr/local/bin/oc create serviceaccount monitoring -n openshift-infra"
+#  shell: "oc create serviceaccount monitoring -n openshift-infra"
 
 
 #- name: Da permissao de cluster-admin para usuario do token
-#  shell: "/usr/local/bin/oc adm policy add-cluster-role-to-user cluster-admin monitoring -z monitoring"
+#  shell: "oc adm policy add-cluster-role-to-user cluster-admin monitoring -z monitoring"
 
 
 #- name: Obtem nome do token
-#  shell: "/usr/local/bin/oc describe sa monitoring -n openshift-infra | grep Tokens | awk {'print $2'}"
+#  shell: "oc describe sa monitoring -n openshift-infra | grep Tokens | awk {'print $2'}"
 
 #  register: nome_token
 
 #- name: Obtem Token
-#  shell: "/usr/local/bin/oc describe secret {{ nome_token.stdout }} -n openshift-infra | grep token: | awk {'print $2'}"
+#  shell: "oc describe secret {{ nome_token.stdout }} -n openshift-infra | grep token: | awk {'print $2'}"
 
 #  register: token
 
 - name: Obtem Token
-  shell: "/usr/local/bin/oc whoami --show-token=true"
+  shell: "oc whoami --show-token=true"
   register: token
 
 - name: Importa template do xpaas
-  shell: "/usr/local/bin/oc create -f {{item}} -n openshift"
+  shell: "oc create -f {{item}} -n openshift"
   with_items:
     - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/fis-image-streams.json
     - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/jboss-image-streams.json
     - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-templates/datagrid71-basic.json
 
 - name: Cria projeto workshop-apoio
-  shell: "/usr/local/bin/oc adm new-project workshop-apoio --admin=admin || echo 'já existe'"
+  shell: "oc adm new-project workshop-apoio --admin=admin || echo 'já existe'"
 
 - name: Da permissoes de anyuid para workshop-apoio
-  shell: "/usr/local/bin/oc adm policy add-scc-to-user anyuid -z default -n workshop-apoio"
+  shell: "oc adm policy add-scc-to-user anyuid -z default -n workshop-apoio"
 
 - name: Instala banco de dados para Etherpad
-  shell: "/usr/local/bin/oc new-app mysql-persistent --param MYSQL_USER=ether --param MYSQL_PASSWORD=ether --param MYSQL_DATABASE=ether --param VOLUME_CAPACITY=1Gi --param MYSQL_VERSION=5.7 --param MEMORY_LIMIT=256Mi --param DATABASE_SERVICE_NAME=mysql-ether -n workshop-apoio"
+  shell: "oc new-app mysql-persistent --param MYSQL_USER=ether --param MYSQL_PASSWORD=ether --param MYSQL_DATABASE=ether --param VOLUME_CAPACITY=1Gi --param MYSQL_VERSION=5.7 --param MEMORY_LIMIT=256Mi --param DATABASE_SERVICE_NAME=mysql-ether -n workshop-apoio"
 
 - name: Instala Etherpad
-  shell: "/usr/local/bin/oc new-app -f https://raw.githubusercontent.com/luszczynski/docker-openshift-etherpad/master/etherpad-template.yaml -p DB_USER=ether -p DB_PASS=ether -p DB_DBID=ether -p DB_PORT=3306 -p DB_HOST=mysql-ether -p ADMIN_PASSWORD=secret -n workshop-apoio"
+  shell: "oc new-app -f https://raw.githubusercontent.com/luszczynski/docker-openshift-etherpad/master/etherpad-template.yaml -p DB_USER=ether -p DB_PASS=ether -p DB_DBID=ether -p DB_PORT=3306 -p DB_HOST=mysql-ether -p ADMIN_PASSWORD=secret -n workshop-apoio"
 
 - name: Cria Wetty Terminal (Backup)
-  shell: "/usr/local/bin/oc new-app lasher/wetty-single --name=wetty -n workshop-apoio || echo 'já existe'"
+  shell: "oc new-app lasher/wetty-single --name=wetty -n workshop-apoio || echo 'já existe'"
 
 - name: Scale down wetty
-  shell: "/usr/local/bin/oc scale dc wetty --replicas=0 -n workshop-apoio"
+  shell: "oc scale dc wetty --replicas=0 -n workshop-apoio"
 
 - name: Cria rota para acesso ao wetty
-  shell: "/usr/local/bin/oc expose svc/wetty -n workshop-apoio || echo 'já existe'"
+  shell: "oc expose svc/wetty -n workshop-apoio || echo 'já existe'"
 
 - name: Obtem nome da rota
-  shell: "/usr/local/bin/oc get route wetty --no-headers -n workshop-apoio | awk '{print $2}'"
+  shell: "oc get route wetty --no-headers -n workshop-apoio | awk '{print $2}'"
   register: result_dominio_wetty
 
 - name: Cria diretorio workshop-stuff
@@ -203,54 +224,61 @@
    mode: 0600
 
 - name: Cria config map para Instructor
-  shell: "/usr/local/bin/oc create configmap instructor-stuff --from-file=/workshop-stuff -n workshop-apoio"
+  shell: "oc create configmap instructor-stuff --from-file=/workshop-stuff -n workshop-apoio"
 
 - name: Salva url etherpad
-  shell: "/usr/local/bin/oc get route etherpad --no-headers -n workshop-apoio | awk '{print $2}'"
+  shell: "oc get route etherpad --no-headers -n workshop-apoio | awk '{print $2}'"
   register: result_dominio_etherpad
 
 - name: Cria deployment Web Instructor
-  shell: "/usr/local/bin/oc new-app  URL_WETTY=http://{{ result_dominio_wetty.stdout }} CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps ETHERPAD_URL={{result_dominio_etherpad.stdout}} --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
+  shell: "oc new-app  URL_WETTY=http://{{ result_dominio_wetty.stdout }} CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps ETHERPAD_URL={{result_dominio_etherpad.stdout}} --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
 
 - name: "Anexa o volume de config map"
-  shell: "/usr/local/bin/oc volumes dc/web-instructor --add --mount-path=/etc/ansible/workshop-stuff --configmap-name=instructor-stuff --type=configmap -n workshop-apoio"
+  shell: "oc volumes dc/web-instructor --add --mount-path=/etc/ansible/workshop-stuff --configmap-name=instructor-stuff --type=configmap -n workshop-apoio"
 
 - name: Anexa volume no instrutor...
-  shell: "/usr/local/bin/oc volume dc/web-instructor --add --type=persistentVolumeClaim --claim-size=1Gi --mount-path=/workshop-pv -n workshop-apoio"
+  shell: "oc volume dc/web-instructor --add --type=persistentVolumeClaim --claim-size=1Gi --mount-path=/workshop-pv -n workshop-apoio"
 
 - name: Cria rota para acesso ao web-workshop
-  shell: "/usr/local/bin/oc expose svc/web-instructor -n workshop-apoio || echo 'já existe'"
+  shell: "oc expose svc/web-instructor -n workshop-apoio || echo 'já existe'"
 
 - name: Obtem nome da rota
-  shell: "/usr/local/bin/oc get route web-instructor --no-headers -n workshop-apoio | awk '{print $2}'"
+  shell: "oc get route web-instructor --no-headers -n workshop-apoio | awk '{print $2}'"
   register: result_dominio_web_workshop
 
 - name: Criar banco de dados
-  shell: "/usr/local/bin/oc new-app --template=mysql-persistent --param=MYSQL_USER=admin --param=MYSQL_DATABASE=workshop --param=MYSQL_PASSWORD=redhat@123 --param=MYSQL_ROOT_PASSWORD=redhat@123 --param=VOLUME_CAPACITY=5Gi -n workshop-apoio || echo 'já existe'"
+  shell: "oc new-app --template=mysql-persistent --param=MYSQL_USER=admin --param=MYSQL_DATABASE=workshop --param=MYSQL_PASSWORD=redhat@123 --param=MYSQL_ROOT_PASSWORD=redhat@123 --param=VOLUME_CAPACITY=5Gi -n workshop-apoio || echo 'já existe'"
 
 - name: Cria projeto workshop-alunos
-  shell: "/usr/local/bin/oc adm new-project workshop-alunos --admin=admin || echo 'já existe'"
+  shell: "oc adm new-project workshop-alunos --admin=admin || echo 'já existe'"
 
 - name: Da permissoes de anyuid para workshop-apoio
-  shell: "/usr/local/bin/oc adm policy add-scc-to-user anyuid -z default -n workshop-alunos"
+  shell: "oc adm policy add-scc-to-user anyuid -z default -n workshop-alunos"
 
 - name: Cria aplicação do sorteio
-  shell: "/usr/local/bin/oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-sorteio --image-stream=fis-java-openshift:2.0 --name=sorteio -n workshop-apoio"
+  shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-sorteio --image-stream=fis-java-openshift:2.0 --name=sorteio -n workshop-apoio"
 
 - name: Corrigi porta do svc
-  shell: "/usr/local/bin/oc delete svc sorteio -n workshop-apoio && /usr/local/bin/oc expose dc/sorteio --port=8080 -n workshop-apoio"
+  shell: "oc delete svc sorteio -n workshop-apoio && oc expose dc/sorteio --port=8080 -n workshop-apoio"
 
 - name: Cria rota para acesso ao sorteio
-  shell: "/usr/local/bin/oc expose svc/sorteio -n workshop-apoio || echo 'já existe'"
+  shell: "oc expose svc/sorteio -n workshop-apoio || echo 'já existe'"
 
 - name: Pause dc triggers
-  shell: "/usr/local/bin/oc rollout pause dc sorteio -n workshop-apoio || echo 'já pausado'"
+  shell: "oc rollout pause dc sorteio -n workshop-apoio || echo 'já pausado'"
 
 - name: Altera limite de cpu e memoria
-  shell: "/usr/local/bin/oc set resources dc sorteio --limits=cpu=400m,memory=350Mi -n workshop-apoio || echo 'já setado'"
+  shell: "oc set resources dc sorteio --limits=cpu=400m,memory=350Mi -n workshop-apoio || echo 'já setado'"
 
 - name: Resume dc triggers
-  shell: "/usr/local/bin/oc rollout resume dc sorteio -n workshop-apoio || echo 'resumed'"
+  shell: "oc rollout resume dc sorteio -n workshop-apoio || echo 'resumed'"
+
+- name: 'Metrics - check on async task'
+  async_status:
+    jid: "{{ metrics_status.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 320
 
 - name: Imprimindo mensagem de sucesso
   debug:
