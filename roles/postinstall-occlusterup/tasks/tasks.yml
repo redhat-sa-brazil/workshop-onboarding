@@ -273,6 +273,19 @@
 - name: Resume dc triggers
   shell: "oc rollout resume dc sorteio -n workshop-apoio || echo 'resumed'"
 
+### Inicio Aplicação Q&A ###
+
+- name: Instala banco de dados para Q&A
+  shell: "oc new-app mysql-persistent --param MYSQL_USER=admin --param MYSQL_PASSWORD=redhat@123 --param MYSQL_DATABASE=qa --param VOLUME_CAPACITY=1Gi --param MYSQL_VERSION=5.7 --param MEMORY_LIMIT=256Mi --param DATABASE_SERVICE_NAME=mysql-qa -n workshop-apoio"
+
+- name: Instala aplicação de Q&A
+  shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-qa --image-stream=redhat-openjdk18-openshift:1.2 --name=questions-answers -n workshop-apoio"
+
+- name: Altera limite de cpu e memoria
+  shell: "oc set resources dc questions-answers --limits=cpu=400m,memory=200Mi -n workshop-apoio || echo 'já setado'"
+
+### Fim Aplicação Q&A ###
+
 - name: 'Metrics - check on async task'
   async_status:
     jid: "{{ metrics_status.ansible_job_id }}"
