@@ -1,0 +1,38 @@
+- name: Envia Emails HTML
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+
+  tasks:
+
+  - name: Carregando variaveis de config.yml
+    include_vars: config.yml
+
+ # - name: Gera email html do aluno
+ #   template:
+ #    src: /var/www/html/template_email_final.html
+ #    dest: "/tmp/email_{{ user }}.html"
+
+  - name: Envia email para aluno
+    mail:
+      host: smtp.gmail.com
+      port: 587
+      username: "{{ email_remetente }}"
+      password: "{{ senha_email }}"
+      to: "<{{ email_aluno }}>"
+      subject: "Workshop/Test-Drive Finalizado!Workshop/Test-Drive Finalizado!"
+      subtype: html
+      body: "{{ lookup('file', '/var/www/html/template_email_final.html') }}"
+    delegate_to: localhost
+
+#- name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
+#  vars:
+#   ansible_ssh_private_key_file: "{{ hostvars['localhost']['chave_ssh'] }}"
+#  hosts: gce_instances_ips
+#  become: yes
+#  become_method: sudo
+#  remote_user: "{{ hostvars['localhost']['usuario_ssh_gce'] }}"
+#  roles:
+#    - postinstall
+
