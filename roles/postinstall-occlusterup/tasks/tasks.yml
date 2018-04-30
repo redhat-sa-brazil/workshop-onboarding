@@ -152,13 +152,6 @@
   shell: "oc whoami --show-token=true"
   register: token
 
-- name: Importa template do xpaas
-  shell: "oc create -f {{item}} -n openshift"
-  with_items:
-    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/fis-image-streams.json
-    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/jboss-image-streams.json
-    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-templates/datagrid71-basic.json
-
 - name: Cria projeto workshop-apoio
   shell: "oc adm new-project workshop-apoio --admin=admin || echo 'já existe'"
 
@@ -255,6 +248,13 @@
 - name: Da permissoes de anyuid para workshop-apoio
   shell: "oc adm policy add-scc-to-user anyuid -z default -n workshop-alunos"
 
+- name: Importa template do xpaas
+  shell: "oc create -f {{item}} -n openshift"
+  with_items:
+    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/fis-image-streams.json
+    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/jboss-image-streams.json
+    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-templates/datagrid71-basic.json
+
 - name: Cria aplicação do sorteio
   shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-sorteio --image-stream=fis-java-openshift:2.0 --name=sorteio -n workshop-apoio"
 
@@ -282,7 +282,7 @@
   shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-qa --image-stream=redhat-openjdk18-openshift:1.2 --name=questions-answers -n workshop-apoio"
 
 - name: Altera limite de cpu e memoria
-  shell: "oc set resources dc questions-answers --limits=cpu=400m,memory=200Mi -n workshop-apoio || echo 'já setado'"
+  shell: "oc set resources dc questions-answers --limits=cpu=400m,memory=250Mi -n workshop-apoio || echo 'já setado'"
 
 ### Fim Aplicação Q&A ###
 
