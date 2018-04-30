@@ -185,6 +185,7 @@
       tower_username: "admin"
       tower_password: "redhat4ever"
       tower_verify_ssl: no
+    ignore_errors: yes
 
   - name: Envia email com dados para acesso
     mail:
