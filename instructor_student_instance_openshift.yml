@@ -122,6 +122,15 @@
     shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc get route web-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
     register: result_dominio_web_workshop
 
+  - name:
+    set_fact:
+     url_estudante: "{{ result_dominio_web_workshop.stdout }}"
+
+  - name: Gera email html do aluno
+    template:
+     src: /var/www/html/template_email_estudante.html
+     dest: "/tmp/email_{{ user }}.html"
+
   - name: Envia email com dados para acesso
     mail:
       host: smtp.gmail.com
@@ -130,7 +139,8 @@
       password: "{{ senha_email }}"
       to: "<{{ email_aluno }}>"
       subject: "Dados para Workshop {{ nome_workshop }}"
-      body: 'Seu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}'
+      subtype: html
+      body: "{{ lookup('file', '/tmp/email_{{ user }}.html') }}"
     delegate_to: localhost
 
 #- name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
