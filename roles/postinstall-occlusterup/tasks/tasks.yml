@@ -27,22 +27,6 @@
     state: started
     enabled: yes
 
-# - name: Baixa imagens docker (async)
-#   shell: docker pull registry.access.redhat.com/openshift3/ose-haproxy-router:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose-deployer:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose-sti-builder:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose-docker-registry:v3.7.42 && docker pull registry.access.redhat.com/openshift3/ose-pod:v3.7.42 && docker pull registry.access.redhat.com/rhscl/php-71-rhel7 && docker pull registry.access.redhat.com/rhscl/mysql-57-rhel7
-#   async: 1000
-#   poll: 0
-#   register: docker_status
-
-#- name: Clona git onboarding app
-#  git:
-#    repo: 'https://github.com/redhat-sa-brazil/workshop-onboarding'
-#    dest: /tmp/onboarding-app
-#    accept_hostkey: yes
-#    force: yes
-
-#- name: Descompacta oc e salve na pasta bin
-#  shell: "rm -rf oc ; cd /tmp/onboarding-app/roles/postinstall-occlusterup/files && 7za e oc.7z && mv /tmp/onboarding-app/roles/postinstall-occlusterup/files/oc /usr/local/bin"
-
 - name: Clona git oc-cluster-wrapper
   git:
     repo: 'https://github.com/luszczynski/oc-cluster-wrapper.git'
@@ -55,13 +39,6 @@
 
 - name: Salva OC ClusterUP ip no profile
   shell: "echo 'export OC_CLUSTER_PUBLIC_HOSTNAME={{ inventory_hostname }}' >> $HOME/.bash_profile"
-
-# - name: 'Docker - check on async task'
-#   async_status:
-#     jid: "{{ docker_status.ansible_job_id }}"
-#   register: job_result
-#   until: job_result.finished
-#   retries: 120
 
 - name: Sobe OC ClusterUP
   shell: "export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}' --metrics --version=v3.7.0"
@@ -158,24 +135,27 @@
 - name: Da permissoes de anyuid para workshop-apoio
   shell: "oc adm policy add-scc-to-user anyuid -z default -n workshop-apoio"
 
+### Inicio Aplicação Etherpad ###
+
 - name: Instala banco de dados para Etherpad
   shell: "oc new-app mysql-persistent --param MYSQL_USER=ether --param MYSQL_PASSWORD=ether --param MYSQL_DATABASE=ether --param VOLUME_CAPACITY=1Gi --param MYSQL_VERSION=5.7 --param MEMORY_LIMIT=256Mi --param DATABASE_SERVICE_NAME=mysql-ether -n workshop-apoio"
 
 - name: Instala Etherpad
   shell: "oc new-app -f https://raw.githubusercontent.com/luszczynski/docker-openshift-etherpad/master/etherpad-template.yaml -p DB_USER=ether -p DB_PASS=ether -p DB_DBID=ether -p DB_PORT=3306 -p DB_HOST=mysql-ether -p ADMIN_PASSWORD=secret -n workshop-apoio"
 
-- name: Cria Wetty Terminal (Backup)
-  shell: "oc new-app lasher/wetty-single --name=wetty -n workshop-apoio || echo 'já existe'"
+- name: Salva url etherpad
+  shell: "oc get route etherpad --no-headers -n workshop-apoio | awk '{print $2}'"
+  register: result_dominio_etherpad
 
-- name: Scale down wetty
-  shell: "oc scale dc wetty --replicas=0 -n workshop-apoio"
+### Fim Aplicação Etherpad ###
 
-- name: Cria rota para acesso ao wetty
-  shell: "oc expose svc/wetty -n workshop-apoio || echo 'já existe'"
+### Inicio config gerais ###
 
-- name: Obtem nome da rota
-  shell: "oc get route wetty --no-headers -n workshop-apoio | awk '{print $2}'"
-  register: result_dominio_wetty
+- name: Cria projeto workshop-alunos
+  shell: "oc adm new-project workshop-alunos --admin=admin || echo 'já existe'"
+
+- name: Da permissoes de anyuid para workshop-apoio
+  shell: "oc adm policy add-scc-to-user anyuid -z default -n workshop-alunos"
 
 - name: Cria diretorio workshop-stuff
   file: 
@@ -216,15 +196,15 @@
    dest: "/workshop-stuff/workshop_id_rsa.pub"
    mode: 0600
 
+### Fim config gerais ###
+
+### Inicio app instrutor ###
+
 - name: Cria config map para Instructor
   shell: "oc create configmap instructor-stuff --from-file=/workshop-stuff -n workshop-apoio"
 
-- name: Salva url etherpad
-  shell: "oc get route etherpad --no-headers -n workshop-apoio | awk '{print $2}'"
-  register: result_dominio_etherpad
-
 - name: Cria deployment Web Instructor
-  shell: "oc new-app  URL_WETTY=http://{{ result_dominio_wetty.stdout }} CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps ETHERPAD_URL={{result_dominio_etherpad.stdout}} --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
+  shell: "oc new-app CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps ETHERPAD_URL={{result_dominio_etherpad.stdout}} --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
 
 - name: "Anexa o volume de config map"
   shell: "oc volumes dc/web-instructor --add --mount-path=/etc/ansible/workshop-stuff --configmap-name=instructor-stuff --type=configmap -n workshop-apoio"
@@ -232,7 +212,7 @@
 - name: Anexa volume no instrutor...
   shell: "oc volume dc/web-instructor --add --type=persistentVolumeClaim --claim-size=1Gi --mount-path=/workshop-pv -n workshop-apoio"
 
-- name: Cria rota para acesso ao web-workshop
+- name: Cria rota para acesso ao instrutor
   shell: "oc expose svc/web-instructor -n workshop-apoio || echo 'já existe'"
 
 - name: Obtem nome da rota
@@ -242,27 +222,22 @@
 - name: Criar banco de dados
   shell: "oc new-app --template=mysql-persistent --param=MYSQL_USER=admin --param=MYSQL_DATABASE=workshop --param=MYSQL_PASSWORD=redhat@123 --param=MYSQL_ROOT_PASSWORD=redhat@123 --param=VOLUME_CAPACITY=5Gi -n workshop-apoio || echo 'já existe'"
 
-- name: Cria projeto workshop-alunos
-  shell: "oc adm new-project workshop-alunos --admin=admin || echo 'já existe'"
+### Fim app instrutor ###
 
-- name: Da permissoes de anyuid para workshop-apoio
-  shell: "oc adm policy add-scc-to-user anyuid -z default -n workshop-alunos"
+### Inicio Aplicação Sorteio ###
 
 - name: Importa template do xpaas
   shell: "oc create -f {{item}} -n openshift"
   with_items:
-    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/fis-image-streams.json
-    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-streams/jboss-image-streams.json
-    - https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.9/xpaas-templates/datagrid71-basic.json
+    - https://raw.githubusercontent.com/luszczynski/openshift-ansible/release-3.9/roles/openshift_examples/files/examples/v3.9/xpaas-streams/fis-image-streams.json
+    - https://raw.githubusercontent.com/luszczynski/openshift-ansible/release-3.9/roles/openshift_examples/files/examples/v3.9/xpaas-streams/jboss-image-streams.json
+    - https://raw.githubusercontent.com/luszczynski/openshift-ansible/release-3.9/roles/openshift_examples/files/examples/v3.9/xpaas-templates/datagrid71-basic.json
 
 - name: Cria aplicação do sorteio
   shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-sorteio --image-stream=fis-java-openshift:2.0 --name=sorteio -n workshop-apoio"
 
 - name: Corrigi porta do svc
   shell: "oc delete svc sorteio -n workshop-apoio && oc expose dc/sorteio --port=8080 -n workshop-apoio"
-
-- name: Cria rota para acesso ao sorteio
-  shell: "oc expose svc/sorteio -n workshop-apoio || echo 'já existe'"
 
 - name: Pause dc triggers
   shell: "oc rollout pause dc sorteio -n workshop-apoio || echo 'já pausado'"
@@ -273,6 +248,8 @@
 - name: Resume dc triggers
   shell: "oc rollout resume dc sorteio -n workshop-apoio || echo 'resumed'"
 
+### Fim Aplicação Sorteio ###
+
 ### Inicio Aplicação Q&A ###
 
 - name: Instala banco de dados para Q&A
@@ -281,8 +258,17 @@
 - name: Instala aplicação de Q&A
   shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-qa --image-stream=redhat-openjdk18-openshift:1.2 --name=questions-answers -n workshop-apoio"
 
+- name: Pause dc triggers
+  shell: "oc rollout pause dc questions-answers -n workshop-apoio"
+
 - name: Altera limite de cpu e memoria
   shell: "oc set resources dc questions-answers --limits=cpu=400m,memory=250Mi -n workshop-apoio || echo 'já setado'"
+
+- name: Altera profile da app
+  shell: oc set env dc/questions-answers JAVA_ARGS=-Dspring.profiles.active=prod -n workshop-apoio
+
+- name: Resume dc triggers
+  shell: "oc rollout resume dc questions-answers -n workshop-apoio || echo 'resumed'"
 
 ### Fim Aplicação Q&A ###
 
