@@ -256,7 +256,8 @@
   shell: "oc new-app mysql-persistent --param MYSQL_USER=admin --param MYSQL_PASSWORD=redhat@123 --param MYSQL_DATABASE=qa --param VOLUME_CAPACITY=1Gi --param MYSQL_VERSION=5.7 --param MEMORY_LIMIT=256Mi --param DATABASE_SERVICE_NAME=mysql-qa -n workshop-apoio"
 
 - name: Instala aplicação de Q&A
-  shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-qa --image-stream=redhat-openjdk18-openshift:1.2 --name=questions-answers -n workshop-apoio"
+  shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-qa --image-stream=redhat-openjdk18-openshift:1.2 --name=questions-answers --allow-missing-imagestream-tags -n workshop-apoio || echo 'Ja existe'"
+  ignore_errors: yes
 
 - name: Pause dc triggers
   shell: "oc rollout pause dc questions-answers -n workshop-apoio"
