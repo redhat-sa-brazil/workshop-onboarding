@@ -6,8 +6,8 @@
     - git
     - docker-1.13.1
     - p7zip
-    - python-rhsm-certificates
     - httpd-tools
+    - subscription-manager-rhsm-certificates
     - centos-release-openshift-origin37
 
 - name: Instala oc client
@@ -262,7 +262,7 @@
   shell: "oc rollout pause dc questions-answers -n workshop-apoio"
 
 - name: Altera limite de cpu e memoria
-  shell: "oc set resources dc questions-answers --limits=cpu=400m,memory=250Mi -n workshop-apoio || echo 'já setado'"
+  shell: "oc set resources dc questions-answers --limits=cpu=400m,memory=350Mi -n workshop-apoio || echo 'já setado'"
 
 - name: Altera profile da app
   shell: oc set env dc/questions-answers JAVA_ARGS=-Dspring.profiles.active=prod -n workshop-apoio
