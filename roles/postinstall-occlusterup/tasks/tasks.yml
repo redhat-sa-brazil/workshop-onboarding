@@ -197,6 +197,10 @@
    mode: 0600
 
 ### Fim config gerais ###
+- name: Remove arquivo de certificado com link invalido
+  file:
+   path: "/etc/docker/certs.d/registry.access.redhat.com/redhat-ca.crt"
+   state: absent
 
 ### Inicio app instrutor ###
 
@@ -259,17 +263,22 @@
   shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-qa --image-stream=redhat-openjdk18-openshift:1.2 --name=questions-answers --allow-missing-imagestream-tags -n workshop-apoio || echo 'Ja existe'"
   ignore_errors: yes
 
-- name: Pause dc triggers
+- name: Pause dc triggers QA
   shell: "oc rollout pause dc questions-answers -n workshop-apoio"
 
-- name: Altera limite de cpu e memoria
+- name: Altera limite de cpu e memoria QA
   shell: "oc set resources dc questions-answers --limits=cpu=400m,memory=350Mi -n workshop-apoio || echo 'já setado'"
 
-- name: Altera profile da app
+- name: Altera profile da app QA
   shell: oc set env dc/questions-answers JAVA_ARGS=-Dspring.profiles.active=prod -n workshop-apoio
 
-- name: Resume dc triggers
+- name: Resume dc triggers QA
   shell: "oc rollout resume dc questions-answers -n workshop-apoio || echo 'resumed'"
+
+- name: Remove porta e cria servico novamente
+  shell: "oc delete svc questions-answers -n workshop-apoio || oc expose dc/questions-answers --port=8080 -n workshop-apoio"
+
+
 
 ### Fim Aplicação Q&A ###
 
