@@ -5,7 +5,6 @@
   with_items:
     - git
     - docker-1.13.1
-    - p7zip
     - httpd-tools
     - subscription-manager-rhsm-certificates
     - centos-release-openshift-origin37
@@ -81,12 +80,8 @@
         max-pods:
           - "100"
 
-- name: Para cluster
-  shell: /usr/local/oc-cluster-wrapper/oc-cluster down workshop && sleep 10
-  ignore_errors: yes  
-
-- name: Inicia novamente cluster
-  shell: export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}' --metrics --version=v3.7.0
+- name: Reinicia cluster
+  shell: /usr/local/oc-cluster-wrapper/oc-cluster down workshop && export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}' --metrics --version=v3.7.0
   ignore_errors: yes
 
 - name: Espera por OC Cluster UP no ar...
@@ -95,6 +90,13 @@
   until: result.stdout.find("Login successful.") != -1
   retries: 10
   delay: 10
+
+- name: Confirma quantidade máxima de pods
+  shell: oc describe node localhost | grep -A 3 Capacity | grep pods | awk '{print $2}'
+  register: max_pods
+  until: max_pods.stdout.find("100") != -1
+  retries: 3
+  delay: 5
 
 - name: Get Metrics Error Pod
   shell: oc get pods -n openshift-infra | grep Error | head -n1 | cut -d' ' -f1
@@ -203,11 +205,12 @@
    dest: "/workshop-stuff/workshop_id_rsa.pub"
    mode: 0600
 
-### Fim config gerais ###
 - name: Remove arquivo de certificado com link invalido
   file:
    path: "/etc/docker/certs.d/registry.access.redhat.com/redhat-ca.crt"
    state: absent
+
+### Fim config gerais ###
 
 ### Inicio app instrutor ###
 
@@ -266,9 +269,15 @@
 - name: Instala banco de dados para Q&A
   shell: "oc new-app mysql-persistent --param MYSQL_USER=admin --param MYSQL_PASSWORD=redhat@123 --param MYSQL_DATABASE=qa --param VOLUME_CAPACITY=1Gi --param MYSQL_VERSION=5.7 --param MEMORY_LIMIT=256Mi --param DATABASE_SERVICE_NAME=mysql-qa -n workshop-apoio"
 
+- name: Valida se já carregou image stream do java
+  shell: oc get is -n openshift | grep redhat-openjdk18-openshift | awk '{print $3}'
+  register: is_java
+  until: is_java.stdout.find("1.2") != -1
+  retries: 10
+  delay: 10
+
 - name: Instala aplicação de Q&A
-  shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-qa --image-stream=redhat-openjdk18-openshift:1.2 --name=questions-answers --allow-missing-imagestream-tags -n workshop-apoio || echo 'Ja existe'"
-  ignore_errors: yes
+  shell: "oc new-app https://github.com/redhat-sa-brazil/workshop-onboarding-app-qa --image-stream=redhat-openjdk18-openshift:1.2 --name=questions-answers -n workshop-apoio"
 
 - name: Pause dc triggers QA
   shell: "oc rollout pause dc questions-answers -n workshop-apoio"
