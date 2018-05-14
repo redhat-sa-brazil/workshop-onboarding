@@ -70,6 +70,24 @@
 #    line: '      file: /root/.oc/profiles/workshop/config/master/users.htpasswd'
 #    backup: yes
 
+- name: Aumenta quantidade de pods no cluster
+  blockinfile:
+    path: /root/.oc/profiles/workshop/config/node-localhost/node-config.yaml
+    insertafter: "kubeletArguments"
+    backup: yes
+    content: |2
+        pods-per-core:
+          - "50"
+        max-pods:
+          - "100"
+
+- name: Para cluster
+  shell: /usr/local/oc-cluster-wrapper/oc-cluster down workshop && sleep 10
+  ignore_errors: yes  
+
+- name: Inicia novamente cluster
+  shell: export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}' --metrics --version=v3.7.0
+  ignore_errors: yes
 
 - name: Espera por OC Cluster UP no ar...
   shell: "oc login -u admin -p qualquersenha https://localhost:8443 --insecure-skip-tls-verify=true | grep successful"
@@ -92,17 +110,6 @@
   shell: >
     oc debug "{{ metrics_pod.stdout }}" -n openshift-infra -- /usr/bin/bash -c "sed -i 's/- include: validate_hostnames.yml/#- include: validate_hostnames.yml/' /usr/share/ansible/openshift-ansible/playbooks/common/openshift-cluster/std_include.yml &&  ansible-playbook -i /tmp/inventory playbooks/byo/openshift-cluster/openshift-metrics.yml"
 
-
-- name: Aumenta quantidade de pods no cluster
-  blockinfile:
-    path: /root/.oc/profiles/workshop/config/node-localhost/node-config.yaml
-    insertafter: "kubeletArguments"
-    backup: yes
-    content: |2
-        pods-per-core:
-          - "50"
-        max-pods:
-          - "100"
 
 - name: Login no cluster
   shell: "oc login -u admin -p qualquersenha"
