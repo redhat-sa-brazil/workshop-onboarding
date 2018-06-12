@@ -4,8 +4,8 @@
   gather_facts: no
   vars:
     machine_type_node: n1-standard-2
-    zone: us-east1-b
-    region: us-east1
+    zone: southamerica-east1-a
+    region: southamerica-east1
     image: centos-7
     preemptible: true
     tamanho_disco_pequeno: 40
