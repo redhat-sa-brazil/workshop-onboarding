@@ -36,7 +36,7 @@
 
   - name: "Cria Disco 1 instancia {{ user }}"
     gce_pd:
-      name: "{{ user }}disk01"
+      name: "{{ user }}-a-disk01"
       image: "{{ image }}"
       size_gb: "{{ tamanho_disco_pequeno }}"
       zone: "{{ zone  }}"
@@ -46,7 +46,7 @@
 
   - name: "Cria Disco 1 instancia {{ user }}-server1"
     gce_pd:
-      name: "{{ user }}disk02"
+      name: "{{ user }}-a-disk02"
       image: "{{ image }}"
       size_gb: "{{ tamanho_disco_pequeno }}"
       zone: "{{ zone  }}"
@@ -56,7 +56,7 @@
 
   - name: "Cria Disco 1 instancia {{ user }}-server2"
     gce_pd:
-      name: "{{ user }}disk03"
+      name: "{{ user }}-a-disk03"
       image: "{{ image }}"
       size_gb: "{{ tamanho_disco_pequeno }}"
       zone: "{{ zone  }}"
@@ -79,7 +79,7 @@
         credentials_file: "{{ credentials_file }}"
         project_id: "{{ project_id }}"
         disks:
-        - name: "{{ user }}disk01"
+        - name: "{{ user }}-a-disk01"
           mode: READ_WRITE
     register: gce_node
 
@@ -98,7 +98,7 @@
         credentials_file: "{{ credentials_file }}"
         project_id: "{{ project_id }}"
         disks:
-        - name: "{{ user }}disk02"
+        - name: "{{ user }}-a-disk02"
           mode: READ_WRITE
 
   - name: "Cria Instancia {{ user }}-server2"
@@ -116,7 +116,7 @@
         credentials_file: "{{ credentials_file }}"
         project_id: "{{ project_id }}"
         disks:
-        - name: "{{ user }}disk03"
+        - name: "{{ user }}-a-disk03"
           mode: READ_WRITE
 
   - name: Salva dados no grupo de inventario... usuario

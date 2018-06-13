@@ -14,7 +14,7 @@
     master_private_ip: ""
     infranode_private_ip: ""
     node1_private_ip: ""
-    user: instrutor
+    user: instrutoransible
     tmpdata: "{{ lookup('file','{{ credentials_file }}')|from_json }}"
 
 #  vars_prompt:
@@ -63,7 +63,7 @@
       name: "{{ user }}disk01"
       image: "{{ image }}"
       size_gb: "{{ tamanho_disco_pequeno }}"
-      zone: "{{ zone  }}"
+      zone: "{{ zone }}"
       service_account_email: "{{ service_account_email }}"
       credentials_file: "{{ credentials_file }}"
       project_id: "{{ project_id }}"

@@ -23,7 +23,7 @@
 
   - name: "Cria Disco 1 instancia {{ user }}"
     gce_pd:
-      name: "{{ user }}disk01"
+      name: "{{ user }}-a-disk01"
       image: "{{ image }}"
       size_gb: "{{ tamanho_disco_pequeno }}"
       zone: "{{ zone  }}"
@@ -33,7 +33,7 @@
 
   - name: "Cria Disco 1 instancia {{ user }}-server1"
     gce_pd:
-      name: "{{ user }}disk02"
+      name: "{{ user }}-a-disk02"
       image: "{{ image }}"
       size_gb: "{{ tamanho_disco_pequeno }}"
       zone: "{{ zone  }}"
@@ -43,7 +43,7 @@
 
   - name: "Cria Disco 1 instancia {{ user }}-server2"
     gce_pd:
-      name: "{{ user }}disk03"
+      name: "{{ user }}-a-disk03"
       image: "{{ image }}"
       size_gb: "{{ tamanho_disco_pequeno }}"
       zone: "{{ zone  }}"
@@ -76,7 +76,7 @@
         project_id: "{{ project_id }}"
         metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
         disks:
-        - name: "{{ user }}disk01"
+        - name: "{{ user }}-a-disk01"
           mode: READ_WRITE
     register: gce_node
 
@@ -96,7 +96,7 @@
         project_id: "{{ project_id }}"
         metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
         disks:
-        - name: "{{ user }}disk02"
+        - name: "{{ user }}-a-disk02"
           mode: READ_WRITE
 
   - name: "Cria Instancia {{ user }}-server2"
@@ -115,7 +115,7 @@
         project_id: "{{ project_id }}"
         metadata: '{"sshKeys":"workshop:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKuZ7MSrvu0nYOQc+w6H1lYnfkDKctaYON5WPYdKuj8KUIaM135Aj7NK857+gvDzi8GAAjWCWx0BuHP6muuDHQD2k1oH5T5kOrXoExtIo0TXwwgeHNiuFLPRKfYL5ACWou0RMd8dvqe9g9jmc9Pu+Omzct4qG/6z/s1UX2hwzw0sGIkIUaH133IP+v9iIWiqMBZZe6GzZZOEx70uEdGumCwsVAKK18WIF1BklcrUG1wrQ69LDhuKP0zzE2mwKiDqUhaa4VLaGULP0kz/PAoZx/wrJSftKwM5oqLoV9kd/YbE01YXOYeEP4cWecBbLacWrNwrZgn6fBMpnZ6TOquMff"}'
         disks:
-        - name: "{{ user }}disk03"
+        - name: "{{ user }}-a-disk03"
           mode: READ_WRITE
 
   - name: Salva dados no grupo de inventario... usuario
