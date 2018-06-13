@@ -5,7 +5,8 @@
   vars:
     machine_type_node: n1-standard-1
     machine_type_small: g1-small
-    zone: southamerica-east1-a
+    zone: us-east1-b
+    region: us-east1
     image: centos-7
     preemptible: false
     tamanho_disco_pequeno: 40
