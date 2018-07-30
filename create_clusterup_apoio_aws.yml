@@ -1,0 +1,103 @@
+- name: Cria instancias Gcloud para OC Cluster UP de Apoio
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    machine_type_node: t2.xlarge
+    region: us-east-2c
+    image: ami-f9adef95
+    preemptible: true
+    tamanho_disco_pequeno: 40
+    tamanho_disco_grande: 50
+    tamanho_disco_adicional: 50
+    master_private_ip: ""
+    infranode_private_ip: ""
+    node1_private_ip: ""
+
+#  vars_prompt:
+#  - name: "senha_email"
+#    prompt: "Digite a senha de seu email gmail"
+#    private: yes
+#  - name: "email_instrutor"
+#    prompt: "Qual o seu email?"
+#    private: no
+
+
+  tasks:
+
+  - name: Carregando variaveis de config.yml
+    include_vars: config.yml
+
+  - name: Cria Instancia Instrutor
+    ec2:
+         aws_access_key: "{{ aws_access_key }}"
+         aws_secret_key: "{{ aws_secret_key }}"
+         group: "{{ aws_security_group }}"
+         instance_type: "{{ machine_type_node }}"
+         image: "{{ image }}"
+         wait: true
+         region: "{{ region }}"
+         vpc_subnet_id: "{{ aws_vpc_network }}"
+         assign_public_ip: yes
+    register: ec2
+
+#  - name: Cria liberacao porta 80, 443 e 8443
+#    gce_net:
+#      name: default
+#      fwname: "openshift-80443"
+#      allowed: tcp:80,443,8443
+#      state: "present"
+#      service_account_email: "{{ service_account_email }}"
+#      credentials_file: "{{ credentials_file }}"
+#      project_id: "{{ project_id }}"
+
+#  - name: "Cria ip estatico {{ user }}"
+#    gce_eip:
+#     service_account_email: "{{ service_account_email }}"
+#     credentials_file: "{{ credentials_file }}"
+#     project_id: "{{ project_id }}"
+#     name: "ip-{{ user }}"
+#     region: "{{ region }}"
+#     state: present
+
+#  - name: "Cria Disco 1 instancia {{ user }}"
+#    gce_pd:
+#      name: "{{ user }}disk01"
+#      image: "{{ image }}"
+#      size_gb: "{{ tamanho_disco_pequeno }}"
+#      zone: "{{ zone }}"
+#      service_account_email: "{{ service_account_email }}"
+#      credentials_file: "{{ credentials_file }}"
+#      project_id: "{{ project_id }}"
+
+
+  - name: Salva dados no grupo de inventario... usuario
+    add_host:
+      hostname: "{{ item.public_ip }}"
+      groupname: aws_instances_ips
+    with_items: "{{ ec2.instances }}"
+
+  - name: Grava IP da instancia na variavel ip_publico
+    set_fact:
+      ip_publico: "{{ item.public_ip }}"
+    with_items: "{{ ec2.instances }}"
+
+  - name: Espera por SSH habilitado...
+    wait_for:
+      delay: 1
+      host: "{{ item.public_ip }}	"
+      port: 22
+      state: started
+      timeout: 30
+    with_items: "{{ ec2.instances }}"
+
+
+- name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
+  vars:
+    
+  hosts: aws_instances_ips
+  become: yes
+  become_method: sudo
+  roles:
+    - postinstall-occlusterup
+
