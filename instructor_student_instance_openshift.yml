@@ -107,11 +107,11 @@
 # ========================================
 # AWS
 # ========================================
-- name: Gera id randomico para Instancia
-  set_fact:
-    id_rand: "{{ pwd_alias }}"
+  - name: Gera id randomico para Instancia
+    set_fact:
+     id_rand: "{{ pwd_alias }}"
 
-- name: Cria Instancia Aluno 
+  - name: Cria Instancia Aluno 
     ec2:
          aws_access_key: "{{ aws_access_key }}"
          aws_secret_key: "{{ aws_secret_key }}"
