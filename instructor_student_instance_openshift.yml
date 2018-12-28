@@ -87,39 +87,39 @@
       usuario_ssh_gce: "{{ usuario_ssh_gce }}"
 
   - name: Login no cluster Openshift
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc login {{ cluster_openshift }} --token={{ token_openshift }} --insecure-skip-tls-verify"
+    shell: "/usr/local/bin/oc login {{ cluster_openshift }} --token={{ token_openshift }} --insecure-skip-tls-verify"
 
   - name: Escolhe projeto
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc project {{ nome_projeto_openshift }}"
+    shell: "/usr/local/bin/oc project {{ nome_projeto_openshift }}"
 
   - name: Cria deployment Wetty aluno
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app lasher/wetty-student openshift={{ ip_publico }} --name=wetty-{{ user }} -n {{ nome_projeto_openshift }}"
+    shell: "/usr/local/bin/oc new-app lasher/wetty-student openshift={{ ip_publico }} --name=wetty-{{ user }} -n {{ nome_projeto_openshift }}"
 
   - name: Pausa gatilho DC
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc rollout pause dc wetty-{{ user }} -n {{ nome_projeto_openshift }}"
+    shell: "/usr/local/bin/oc rollout pause dc wetty-{{ user }} -n {{ nome_projeto_openshift }}"
 
   - name: Seta limites para wetty do aluno
-    shell: export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc set resources dc wetty-{{ user }} --limits=memory=50Mi -n {{ nome_projeto_openshift }}
+    shell: /usr/local/bin/oc set resources dc wetty-{{ user }} --limits=memory=50Mi -n {{ nome_projeto_openshift }}
 
   - name: Cria deployment Wetty aluno
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc rollout resume dc wetty-{{ user }} -n {{ nome_projeto_openshift }}"
+    shell: "/usr/local/bin/oc rollout resume dc wetty-{{ user }} -n {{ nome_projeto_openshift }}"
 
   - name: Cria rota para acesso ao wetty-aluno
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc expose svc/wetty-{{ user }} -n {{ nome_projeto_openshift }}"
+    shell: "/usr/local/bin/oc expose svc/wetty-{{ user }} -n {{ nome_projeto_openshift }}"
 
   - name: Obtem nome da rota wetty
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc get route wetty-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
+    shell: "/usr/local/bin/oc get route wetty-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
     register: result_url_wetty
 
   - name: Cria deployment web_workshop
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app ETHERPAD_URL={{ etherpad_url }} LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src  --name=web-{{ user }} "
+    shell: "/usr/local/bin/oc new-app ETHERPAD_URL={{ etherpad_url }} LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src  --name=web-{{ user }} "
 
 
   - name: Cria rota para acesso ao web-workshop...
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc expose svc/web-{{ user }}"
+    shell: "/usr/local/bin/oc expose svc/web-{{ user }}"
 
   - name: Obtem nome da rota
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc get route web-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
+    shell: "/usr/local/bin/oc get route web-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
     register: result_dominio_web_workshop
 
   - name:
