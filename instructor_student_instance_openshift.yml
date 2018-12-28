@@ -14,11 +14,18 @@
     master_private_ip: ""
     infranode_private_ip: ""
     node1_private_ip: ""
-
+    machine_type_node_aws: t2.xlarge
+    region_aws: sa-east-1
+    image_aws:   ami-cb5803a7
+    
   tasks:
 
   - name: Carregando variaveis de config.yml
     include_vars: config.yml
+
+# ========================================
+# GCE
+# ========================================
 
   - name: "Cria Disco 1 instancia {{ user }}"
     gce_pd:
@@ -29,6 +36,7 @@
       service_account_email: "{{ service_account_email }}"
       credentials_file: "{{ credentials_file }}"
       project_id: "{{ project_id }}"
+    when: provider == "gce"
 
 
   - name: "Cria ip estatico {{ user }}"
@@ -39,6 +47,7 @@
      name: "ip-{{ user }}"
      region: "{{ region }}"
      state: present
+    when: provider == "gce"
 
 
   - name: "Cria Instancia {{ user }}"
@@ -59,6 +68,7 @@
         - name: "{{ user }}disk01"
           mode: READ_WRITE
     register: gce_node
+    when: provider == "gce"
 
 
   - name: Salva dados no grupo de inventario... usuario
@@ -66,11 +76,13 @@
       hostname: "{{ item.public_ip }}"
       groupname: gce_instances_ips
     with_items: "{{ gce_node.instance_data }}"
+    when: provider == "gce"
 
   - name: Grava IP da instancia na variavel ip_publico
     set_fact:
       ip_publico: "{{ item.public_ip }}"
     with_items: "{{ gce_node.instance_data }}"
+    when: provider == "gce"
 
   - name: Espera por SSH habilitado...
     wait_for:
@@ -80,11 +92,25 @@
       state: started
       timeout: 30
     with_items: "{{ gce_node.instance_data }}"
+    when: provider == "gce"
 
   - name: "Seta variaveis para proximos passos"
     set_fact: 
       chave_ssh: "{{ chave_ssh }}"
       usuario_ssh_gce: "{{ usuario_ssh_gce }}"
+
+# ========================================
+# FIM GCE
+# ========================================
+
+# ========================================
+# AWS
+# ========================================
+
+# ========================================
+# FIM AWS
+# ========================================
+
 
   - name: Login no cluster Openshift
     shell: "/usr/local/bin/oc login {{ cluster_openshift }} --token={{ token_openshift }} --insecure-skip-tls-verify"
