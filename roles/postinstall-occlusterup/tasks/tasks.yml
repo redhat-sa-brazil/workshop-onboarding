@@ -33,14 +33,26 @@
     accept_hostkey: yes
     force: yes
 
+- name: Define IP para ser usado pelo Openshift para Amazon
+  set_fact:
+    public_ip: "{{ private_ip }}"
+    public_ip_final: "{{ public_ip }}"
+  when: provider == "aws"
+
+- name: Define IP para ser usado pelo Openshift para GCE
+  set_fact:
+    public_ip: "{{ inventory_hostname }}"
+    public_ip_final: "{{ inventory_hostname }}"
+  when: provider == "gce"
+
 - name: Atualizar variavel bash_profile
   shell: "echo 'PATH=/usr/local/oc-cluster-wrapper:$PATH' >> $HOME/.bash_profile"
 
 - name: Salva OC ClusterUP ip no profile
-  shell: "echo 'export OC_CLUSTER_PUBLIC_HOSTNAME={{ inventory_hostname }}' >> $HOME/.bash_profile"
+  shell: "echo 'export OC_CLUSTER_PUBLIC_HOSTNAME={{ public_ip }}' >> $HOME/.bash_profile"
 
 - name: Sobe OC ClusterUP
-  shell: "export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}' --metrics --version=v3.7.0"
+  shell: "export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ public_ip_final }}' --metrics --version=v3.7.0"
 
 #- name: Criar arquivo de senhas
 #  shell: htpasswd -b -c /root/.oc/profiles/workshop/config/master/users.htpasswd admin redhat@123
@@ -81,7 +93,7 @@
           - "100"
 
 - name: Reinicia cluster
-  shell: /usr/local/oc-cluster-wrapper/oc-cluster down workshop && export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ inventory_hostname }}' --metrics --version=v3.7.0
+  shell: /usr/local/oc-cluster-wrapper/oc-cluster down workshop && export PATH=$PATH:/usr/local/bin; /usr/local/oc-cluster-wrapper/oc-cluster up workshop --public-hostname='{{ public_ip_final }}' --metrics --version=v3.7.0
   ignore_errors: yes
 
 - name: Espera por OC Cluster UP no ar...
@@ -141,8 +153,8 @@
 - name: Cria projeto workshop-apoio
   shell: "oc adm new-project workshop-apoio --admin=admin || echo 'já existe'"
 
-- name: Da permissoes de anyuid para workshop-apoio
-  shell: "oc adm policy add-scc-to-user anyuid -z default -n workshop-apoio"
+#- name: Da permissoes de anyuid para workshop-apoio
+#  shell: "oc adm policy add-scc-to-user anyuid -z default -n workshop-apoio"
 
 ### Inicio Aplicação Etherpad ###
 
@@ -178,10 +190,11 @@
    state: directory
    mode: 0777
 
-- name: Copia json para Instancia
+- name: Copia json para Instancia GCE
   copy:
    src: "{{ credentials_file }}"
    dest: "/workshop-stuff/conteudo_json_gce.json"
+  when: provider == "gce"
 
 - name: Copia config.yaml para Instancia
   copy:
@@ -218,7 +231,7 @@
   shell: "oc create configmap instructor-stuff --from-file=/workshop-stuff -n workshop-apoio"
 
 - name: Cria deployment Web Instructor
-  shell: "oc new-app CLUSTER_OPENSHIFT=https://{{ inventory_hostname }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps ETHERPAD_URL={{result_dominio_etherpad.stdout}} --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
+  shell: "oc new-app HOME=/tmp CLUSTER_OPENSHIFT=https://{{ public_ip_final }}:8443 TOKEN_OPENSHIFT={{ token.stdout }} https://github.com/redhat-sa-brazil/workshop-onboarding-apps ETHERPAD_URL={{result_dominio_etherpad.stdout}} --context-dir=Workshop-PHP-Instructor --name=web-instructor --strategy=docker -n workshop-apoio || echo 'já existe'"
 
 - name: "Anexa o volume de config map"
   shell: "oc volumes dc/web-instructor --add --mount-path=/etc/ansible/workshop-stuff --configmap-name=instructor-stuff --type=configmap -n workshop-apoio"
@@ -307,4 +320,4 @@
 
 - name: Imprimindo mensagem de sucesso
   debug:
-   msg: "O link de acesso para seu ambiente do Openshift é: https://{{ inventory_hostname }}:8443 \nSeu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}"
+   msg: "O link de acesso para seu ambiente do Openshift é: https://{{ public_ip_final }}:8443 \nSeu ambiente de Workshop esta disponivel em {{ result_dominio_web_workshop.stdout }}"
