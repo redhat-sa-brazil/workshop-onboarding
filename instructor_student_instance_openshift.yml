@@ -37,7 +37,7 @@
       service_account_email: "{{ service_account_email }}"
       credentials_file: "{{ credentials_file }}"
       project_id: "{{ project_id }}"
-    when: provider == "gce"
+    when: provider == "gce" and create_student_instance == "S"
 
 
   - name: "Cria ip estatico {{ user }}"
@@ -48,7 +48,7 @@
      name: "ip-{{ user }}"
      region: "{{ region }}"
      state: present
-    when: provider == "gce"
+    when: provider == "gce" and create_student_instance == "S"
 
 
   - name: "Cria Instancia {{ user }}"
@@ -69,7 +69,7 @@
         - name: "{{ user }}disk01"
           mode: READ_WRITE
     register: gce_node
-    when: provider == "gce"
+    when: provider == "gce" and create_student_instance == "S"
 
 
   - name: Salva dados no grupo de inventario... usuario
@@ -77,13 +77,13 @@
       hostname: "{{ item.public_ip }}"
       groupname: gce_instances_ips
     with_items: "{{ gce_node.instance_data }}"
-    when: provider == "gce"
+    when: provider == "gce" and create_student_instance == "S"
 
   - name: Grava IP da instancia na variavel ip_publico
     set_fact:
       ip_publico: "{{ item.public_ip }}"
     with_items: "{{ gce_node.instance_data }}"
-    when: provider == "gce"
+    when: provider == "gce" and create_student_instance == "S"
 
   - name: Espera por SSH habilitado...
     wait_for:
@@ -93,7 +93,7 @@
       state: started
       timeout: 30
     with_items: "{{ gce_node.instance_data }}"
-    when: provider == "gce"
+    when: provider == "gce" and create_student_instance == "S"
 
   - name: "Seta variaveis para proximos passos"
     set_fact: 
@@ -129,7 +129,7 @@
             volume_type: gp2
             volume_size: 40
     register: ec2
-    when: provider == "aws"
+    when: provider == "aws" and create_student_instance == "S"
 
 
 
@@ -149,20 +149,20 @@
           - 443
           - 8443
          cidr_ip: 0.0.0.0/0
-    when: provider == "aws"
+    when: provider == "aws" and create_student_instance == "S"
 
   - name: Salva dados no grupo de inventario... usuario
     add_host:
       hostname: "{{ item.public_ip }}"
       groupname: aws_instances_ips
     with_items: "{{ ec2.instances }}"
-    when: provider == "aws"
+    when: provider == "aws" and create_student_instance == "S"
 
   - name: Grava IP da instancia na variavel ip_publico
     set_fact:
       ip_publico: "{{ item.public_dns_name }}"
     with_items: "{{ ec2.instances }}"
-    when: provider == "aws"
+    when: provider == "aws" and create_student_instance == "S"
 
   - name: Espera por SSH habilitado...
     wait_for:
@@ -172,7 +172,7 @@
       state: started
       timeout: 60
     with_items: "{{ ec2.instances }}"
-    when: provider == "aws"
+    when: provider == "aws" and create_student_instance == "S"
 
   - name: "Seta variaveis para proximos passos, incluindo o endereco {{ ip_publico }}"
     set_fact:
@@ -182,7 +182,7 @@
       public_ip: "{{ item.public_ip }}"
       public_dns: "{{ item.public_dns_name }}"
     with_items: "{{ ec2.instances }}"
-    when: provider == "aws"
+    when: provider == "aws" and create_student_instance == "S"
 
 
 # ========================================
@@ -197,7 +197,7 @@
     shell: "/usr/local/bin/oc project {{ nome_projeto_openshift }}"
 
   - name: Cria deployment Wetty aluno
-    shell: "/usr/local/bin/oc new-app lasher/wetty-student openshift={{ ip_publico }} --name=wetty-{{ user }} -n {{ nome_projeto_openshift }}"
+    shell: "/usr/local/bin/oc new-app lasher/wetty-student openshift={{ ip_publico }} sshuser={{ usuario_ssh }} --name=wetty-{{ user }} -n {{ nome_projeto_openshift }}"
 
   - name: Pausa gatilho DC
     shell: "/usr/local/bin/oc rollout pause dc wetty-{{ user }} -n {{ nome_projeto_openshift }}"
@@ -214,6 +214,16 @@
   - name: Obtem nome da rota wetty
     shell: "/usr/local/bin/oc get route wetty-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
     register: result_url_wetty
+
+  - name: Obtem nome do pod wetty
+    shell: "/usr/local/bin/oc get pod -l app=wetty-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $1}'"
+    register: result_url_pod_wetty
+
+  - name: Copia arquivo chave ssh para wetty
+    shell: "oc cp /etc/ansible/playbooks/ssh {{ result_url_pod_wetty.stdout }}:/home/workshop/.ssh/id_rsa"
+
+  - name: Fixa permissoes chave
+    shell: "oc rsh {{ result_url_pod_wetty.stdout }} chmod 0600 /home/workshop/.ssh/id_rsa"  
 
   - name: Cria deployment web_workshop
     shell: "/usr/local/bin/oc new-app ETHERPAD_URL={{ etherpad_url }} LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src  --name=web-{{ user }} "
