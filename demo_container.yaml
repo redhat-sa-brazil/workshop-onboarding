@@ -14,7 +14,7 @@
     master_private_ip: ""
     infranode_private_ip: ""
     node1_private_ip: ""
-    user: instructorbv2
+    user: democontainer
     tmpdata: "{{ lookup('file','{{ credentials_file }}')|from_json }}"
 
 #  vars_prompt:
@@ -112,19 +112,12 @@
       chave_ssh: "{{ chave_ssh }}"
       usuario_ssh_gce: "{{ usuario_ssh_gce }}"
       credentials_file_json: "{{ credentials_file }}"
-      provider: "{{ provider }}"
-      public_ip: "{{ item.public_ip }}"
-      private_ip: "{{ item.private_ip }}"
-    with_items: "{{ gce_node.instance_data }}"
 
 
 - name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
   vars:
    ansible_ssh_private_key_file: "{{ hostvars['localhost']['chave_ssh'] }}"
    credentials_file: "{{ hostvars['localhost']['credentials_file_json'] }}"
-   public_ip: "{{ hostvars['localhost']['public_ip'] }}"
-   private_ip: "{{ hostvars['localhost']['private_ip'] }}"
-   provider: "{{ hostvars['localhost']['provider'] }}"
    conteudo_json: "{{ lookup(\"file\", \"{{ hostvars['localhost']['credentials_file_json'] }}\") }}"
   hosts: gce_instances_ips
   become: yes

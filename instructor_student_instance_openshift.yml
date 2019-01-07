@@ -218,12 +218,15 @@
   - name: Obtem nome do pod wetty
     shell: "/usr/local/bin/oc get pod -l app=wetty-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $1}'"
     register: result_url_pod_wetty
+    ignore_errors: yes
 
   - name: Copia arquivo chave ssh para wetty
     shell: "oc cp /etc/ansible/playbooks/ssh {{ result_url_pod_wetty.stdout }}:/home/workshop/.ssh/id_rsa"
+    ignore_errors: yes
 
   - name: Fixa permissoes chave
     shell: "oc rsh {{ result_url_pod_wetty.stdout }} chmod 0600 /home/workshop/.ssh/id_rsa"  
+    ignore_errors: yes
 
   - name: Cria deployment web_workshop
     shell: "/usr/local/bin/oc new-app ETHERPAD_URL={{ etherpad_url }} LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src  --name=web-{{ user }} "
