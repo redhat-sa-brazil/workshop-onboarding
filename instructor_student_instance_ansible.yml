@@ -112,7 +112,7 @@
         disks:
         - name: "{{ user }}-a-disk02"
           mode: READ_WRITE
-     register: gce1
+    register: gce1
     when: provider == "gce" and create_student_instance == "S"
 
   - name: "Cria Instancia {{ user }}-server2"
