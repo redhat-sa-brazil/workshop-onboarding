@@ -112,6 +112,7 @@
         disks:
         - name: "{{ user }}-a-disk02"
           mode: READ_WRITE
+     register: gce1
     when: provider == "gce" and create_student_instance == "S"
 
   - name: "Cria Instancia {{ user }}-server2"
@@ -132,6 +133,7 @@
         disks:
         - name: "{{ user }}-a-disk03"
           mode: READ_WRITE
+    register: gce2
     when: provider == "gce" and create_student_instance == "S"
 
   - name: Salva dados no grupo de inventario... usuario
@@ -146,6 +148,19 @@
       ip_publico: "{{ item.public_ip }}"
     with_items: "{{ gce_node.instance_data }}"
     when: provider == "gce" and create_student_instance == "S"
+
+  - name: Grava IP da instancia server-1 
+    set_fact:
+      ip_server1: "{{ item.private_ip }}"
+    with_items: "{{ gce1.instance_data }}"
+    when: provider == "gce" and create_student_instance == "S"
+
+  - name: Grava IP da instancia server-2
+    set_fact:
+      ip_server2: "{{ item.private_ip }}"
+    with_items: "{{ gce2.instance_data }}"
+    when: provider == "gce" and create_student_instance == "S"
+
 
   - name: Espera por SSH habilitado...
     wait_for:
@@ -208,7 +223,7 @@
           - device_name: /dev/sda1
             volume_type: gp2
             volume_size: 40
-    register: ec2_2
+    register: aws1
     when: provider == "aws" and create_student_instance == "S"
 
   - name: Cria Instancia Aluno 3
@@ -229,7 +244,7 @@
           - device_name: /dev/sda1
             volume_type: gp2
             volume_size: 40
-    register: ec2_3
+    register: aws2
     when: provider == "aws" and create_student_instance == "S"
 
   - name: Cria regras de firewall
@@ -261,6 +276,18 @@
     set_fact:
       ip_publico: "{{ item.public_dns_name }}"
     with_items: "{{ ec2.instances }}"
+    when: provider == "aws" and create_student_instance == "S"
+
+  - name: Grava IP do server1
+    set_fact:
+      ip_server1: "{{ item.private_dns_name }}"
+    with_items: "{{ aws1.instances }}"
+    when: provider == "aws" and create_student_instance == "S"
+
+  - name: Grava IP do server2
+    set_fact:
+      ip_server2: "{{ item.private_dns_name }}"
+    with_items: "{{ aws2.instances }}"
     when: provider == "aws" and create_student_instance == "S"
 
   - name: Espera por SSH habilitado...
@@ -316,7 +343,7 @@
     register: result_url_wetty
 
   - name: Cria deployment web_workshop
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src --name=web-{{ user }} || echo 'Ja existe'"
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app SERVER1={{ ip_server1 }} SERVER2={{ ip_server2 }} LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src --name=web-{{ user }} || echo 'Ja existe'"
 
   - name: Cria rota para acesso ao web-workshop...
     shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc expose svc/web-{{ user }} || echo 'Ja existe'"
