@@ -151,13 +151,13 @@
 
   - name: Grava IP da instancia server-1 
     set_fact:
-      ip_server1: "{{ item.private_ip }}"
+      ip_server1: "{{ user }}-server1"
     with_items: "{{ gce1.instance_data }}"
     when: provider == "gce" and create_student_instance == "S"
 
   - name: Grava IP da instancia server-2
     set_fact:
-      ip_server2: "{{ item.private_ip }}"
+      ip_server2: "{{ user }}-server2"
     with_items: "{{ gce2.instance_data }}"
     when: provider == "gce" and create_student_instance == "S"
 
