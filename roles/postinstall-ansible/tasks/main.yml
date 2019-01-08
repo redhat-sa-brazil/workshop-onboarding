@@ -1,6 +1,6 @@
 - name:  Cria usuario workshop 
   user:
-    name: workshop
+    name: "{{ usuario_ssh }}"
     comment: "Usuario Workshop"
   ignore_errors: yes
 
@@ -9,14 +9,14 @@
   file:
     path: /workshop/templates
     state: directory
-    owner: workshop 
+    owner: "{{ usuario_ssh }}" 
     recurse: yes
 
 - name: "Copiando chaves de ssh privada"
   copy:
    src: "{{ role_path }}/files/workshop_id_rsa"
    dest: /workshop/chave
-   owner: workshop
+   owner: "{{ usuario_ssh }}"
    mode: 0600
 
 - name: "Copiando arquivo de repositorio"
