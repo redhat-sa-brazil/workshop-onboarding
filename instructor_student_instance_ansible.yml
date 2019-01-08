@@ -100,7 +100,7 @@
         machine_type: "{{ machine_type_small }}"
         image: "{{ image }}"
         zone: "{{ zone }}"
-        external_ip: none
+        
         preemptible: "{{ preemptible }}"
         tags:
          - http-server
@@ -120,7 +120,7 @@
         machine_type: "{{ machine_type_small }}"
         image: "{{ image }}"
         zone: "{{ zone }}"
-        external_ip: none
+        
         preemptible: "{{ preemptible }}"
         tags:
          - http-server
@@ -181,6 +181,8 @@
          vpc_subnet_id: "{{ aws_subnet_id }}"
          id: "{{ id_rand }}"
          assign_public_ip: yes
+         instance_tags: 
+           Name: "{{ user }}"
          volumes:
           - device_name: /dev/sda1
             volume_type: gp2
@@ -200,6 +202,8 @@
          region: "{{ region_aws }}"
          vpc_subnet_id: "{{ aws_subnet_id }}"
          assign_public_ip: yes
+         instance_tags: 
+           Name: "{{ user }}-server1"
          volumes:
           - device_name: /dev/sda1
             volume_type: gp2
@@ -219,6 +223,8 @@
          region: "{{ region_aws }}"
          vpc_subnet_id: "{{ aws_subnet_id }}"
          assign_public_ip: yes
+         instance_tags: 
+           Name: "{{ user }}-server2"
          volumes:
           - device_name: /dev/sda1
             volume_type: gp2
