@@ -188,7 +188,7 @@
     register: ec2
     when: provider == "aws" and create_student_instance == "S"
 
- - name: Cria Instancia Aluno 2
+  - name: Cria Instancia Aluno 2
     ec2:
          aws_access_key: "{{ aws_access_key }}"
          aws_secret_key: "{{ aws_secret_key }}"
@@ -207,7 +207,7 @@
     register: ec2_2
     when: provider == "aws" and create_student_instance == "S"
 
- - name: Cria Instancia Aluno 3
+  - name: Cria Instancia Aluno 3
     ec2:
          aws_access_key: "{{ aws_access_key }}"
          aws_secret_key: "{{ aws_secret_key }}"
