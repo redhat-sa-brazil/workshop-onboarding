@@ -371,7 +371,7 @@
   hosts: instances_ips
   become: yes
   become_method: sudo
-  remote_user: "workshop"
+  remote_user: "{{ hostvars['localhost']['usuario_ssh'] }}"
   roles:
     - postinstall-ansible
 
