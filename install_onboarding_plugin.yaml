@@ -1,0 +1,10 @@
+- name: Instala plugin no RHPDS
+  hosts: rhpds 
+  vars:
+  become: yes
+  gather_facts: false
+  become_method: sudo
+  remote_user: ec2-user
+  roles:
+    - rhpds-plugin
+
