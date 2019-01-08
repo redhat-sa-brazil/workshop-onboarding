@@ -297,7 +297,7 @@
     shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc project {{ nome_projeto_openshift }}"
 
   - name: Cria deployment Wetty aluno
-    shell: "/usr/local/bin/oc new-app lasher/wetty-single-new openshift={{ ip_publico }} sshuser={{ usuario_ssh }} --name=wetty-{{ user }} -n {{ nome_projeto_openshift }}"
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app lasher/wetty-single-new openshift={{ ip_publico }} sshuser={{ usuario_ssh }} --name=wetty-{{ user }} -n {{ nome_projeto_openshift }}"
   
   - name: Pausa gatilho DC
     shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc rollout pause dc wetty-{{ user }} -n {{ nome_projeto_openshift }}"
