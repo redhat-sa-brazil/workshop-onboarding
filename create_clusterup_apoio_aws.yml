@@ -5,7 +5,7 @@
   vars:
     machine_type_node: t2.xlarge
     region: sa-east-1
-    image:   ami-cb5803a7
+#    image:   ami-cb5803a7
     preemptible: true
     tamanho_disco_pequeno: 40
     tamanho_disco_grande: 50
@@ -57,7 +57,7 @@
       name: regrasopenshift
       description: "Regras para Openshift"
       vpc_id: "{{ aws_vpc_network }}"
-      region: sa-east-1
+      region: "{{ region }}"
       rules:
        - proto: tcp
          ports:
