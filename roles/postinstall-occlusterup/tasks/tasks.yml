@@ -123,6 +123,7 @@
   register: metrics_status
   shell: >
     oc debug "{{ metrics_pod.stdout }}" -n openshift-infra -- /usr/bin/bash -c "sed -i 's/- include: validate_hostnames.yml/#- include: validate_hostnames.yml/' /usr/share/ansible/openshift-ansible/playbooks/common/openshift-cluster/std_include.yml &&  ansible-playbook -i /tmp/inventory playbooks/byo/openshift-cluster/openshift-metrics.yml"
+  ignore_errors: yes
 
 
 - name: Login no cluster
