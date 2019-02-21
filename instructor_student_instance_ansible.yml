@@ -152,12 +152,14 @@
   - name: Grava IP da instancia server-1 
     set_fact:
       ip_server1: "{{ user }}-server1"
+      ip_server1_publico: "{{ item.public_ip }}"
     with_items: "{{ gce1.instance_data }}"
     when: provider == "gce" and create_student_instance == "S"
 
   - name: Grava IP da instancia server-2
     set_fact:
       ip_server2: "{{ user }}-server2"
+      ip_server2_publico: "{{ item.public_ip }}"
     with_items: "{{ gce2.instance_data }}"
     when: provider == "gce" and create_student_instance == "S"
 
@@ -281,12 +283,14 @@
   - name: Grava IP do server1
     set_fact:
       ip_server1: "{{ item.private_dns_name }}"
+      ip_server1_publico: "{{ item.public_dns_name }}"
     with_items: "{{ aws1.instances }}"
     when: provider == "aws" and create_student_instance == "S"
 
   - name: Grava IP do server2
     set_fact:
       ip_server2: "{{ item.private_dns_name }}"
+      ip_server2_publico: "{{ item.public_dns_name }}"
     with_items: "{{ aws2.instances }}"
     when: provider == "aws" and create_student_instance == "S"
 
@@ -343,7 +347,7 @@
     register: result_url_wetty
 
   - name: Cria deployment web_workshop
-    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app RHPDS_ANSIBLE_URL={{ rhpds_ansible_url }} USUARIOSSH={{ usuario_ssh }} SERVER1={{ ip_server1 }} SERVER2={{ ip_server2 }} LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src --name=web-{{ user }} || echo 'Ja existe'"
+    shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc new-app RHPDS_ANSIBLE_URL={{ rhpds_ansible_url }} USUARIOSSH={{ usuario_ssh }} SERVER1={{ ip_server1 }} SERVER1_PUBLICO={{ ip_server1_publico }} SERVER2={{ ip_server2 }} SERVER2_PUBLICO={{ ip_server2_publico }} LINK_FORM_FEEDBACK={{ link_form_feedback }} TOWER={{ endereco_tower }} IP_CLUSTER_OCP={{ cluster_openshift }} NOME_WORKSHOP={{ nome_workshop  }} ALUNO={{ user }} IP_INSTANCIA={{ ip_publico }} URL_WETTY=http://{{ result_url_wetty.stdout }} php~https://github.com/redhat-sa-brazil/workshop-onboarding-apps --context-dir=Workshop-PHP-Student/src --name=web-{{ user }} || echo 'Ja existe'"
 
   - name: Cria rota para acesso ao web-workshop...
     shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc expose svc/web-{{ user }} || echo 'Ja existe'"
