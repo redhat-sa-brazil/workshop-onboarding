@@ -1,4 +1,4 @@
-- name: Cria instancias Gcloud para OC Cluster UP de Apoio
+- name: Cria Tower
   hosts: localhost
   connection: local
   gather_facts: false
@@ -29,21 +29,21 @@
     include_vars: config.yml
 
 
-  - name: Cria Instancia Instrutor
+  - name: Cria Instancia Tower
     ec2:
          aws_access_key: "{{ aws_access_key }}"
          aws_secret_key: "{{ aws_secret_key }}"
          key_name: "{{ aws_key_name }}"
          group: "default"
          instance_type: "{{ machine_type_node }}"
-         image: "{{ image }}"
+         image: ami-0b936b121ab76ff85
          wait: true
          region: "{{ region }}"
          vpc_subnet_id: "{{ aws_subnet_id }}"
     #     id: "{{ id_instancia_aws }}"
     #    
          instance_tags:
-          Name: InstructorAnsible-2
+          Name: AnsibleTower
          assign_public_ip: yes
          volumes:
           - device_name: /dev/sda1
@@ -99,19 +99,4 @@
       public_dns: "{{ item.public_dns_name }}"
     with_items: "{{ ec2.instances }}"
 
-
-- name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
-  vars:
-   ansible_ssh_private_key_file: "{{ hostvars['localhost']['chave_ssh'] }}"
-   public_ip: "{{ hostvars['localhost']['public_ip'] }}"
-   public_dns: "{{ hostvars['localhost']['public_dns'] }}"
-   private_ip: "{{ hostvars['localhost']['private_ip'] }}"
-   provider: "{{ hostvars['localhost']['provider'] }}"
-  hosts: aws_instances_ips
-  become: yes
-  gather_facts: false
-  become_method: sudo
-  remote_user: "{{ hostvars['localhost']['usuario_ssh_aws'] }}"
-  roles:
-    - postinstall-occlusterup
 
