@@ -43,12 +43,15 @@
     #     id: "{{ id_instancia_aws }}"
     #    
          instance_tags:
-          Name: InstructorAnsible-2
+          Name: SeiOCP4
          assign_public_ip: yes
          volumes:
           - device_name: /dev/sda1
             volume_type: gp2
             volume_size: 40
+          - device_name: /dev/sdb
+            volume_type: gp2
+            volume_size: 100
     register: ec2
 
 
@@ -113,5 +116,4 @@
   become_method: sudo
   remote_user: "{{ hostvars['localhost']['usuario_ssh_aws'] }}"
   roles:
-    - postinstall-occlusterup
-
+    - postinstall-hostpreparation

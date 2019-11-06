@@ -1,0 +1,2 @@
+#!/bin/bash
+oc cluster up --public-hostname={{ dns_publico }} --host-data-dir=/var/lib/origin/openshift.local.etcd --host-config-dir=/var/lib/origin/openshift.local.config --host-pv-dir=/var/lib/origin/openshift.local.pv --metrics --version=v3.7.0 --use-existing-config --routing-suffix={{ ip_publico }}.nip.io
