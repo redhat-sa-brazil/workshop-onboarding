@@ -130,6 +130,9 @@
           - device_name: /dev/sda1
             volume_type: gp2
             volume_size: 40
+          - device_name: /dev/sdb
+            volume_type: gp2
+            volume_size: 100
     register: ec2
     when: provider == "aws" and create_student_instance == "S"
 
@@ -262,13 +265,20 @@
       body: "{{ lookup('file', '/tmp/email_{{ user }}.html') }}"
     delegate_to: localhost
 
-#- name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
-#  vars:
-#   ansible_ssh_private_key_file: "{{ hostvars['localhost']['chave_ssh'] }}"
-#  hosts: gce_instances_ips
-#  become: yes
-#  become_method: sudo
-#  remote_user: "{{ hostvars['localhost']['usuario_ssh_gce'] }}"
-#  roles:
-#    - postinstall
+- name: "Configura Hosts seguindo roles... {{ hostvars['localhost']['chave_ssh'] }} "
+  vars:
+   ansible_ssh_private_key_file: "{{ hostvars['localhost']['chave_ssh'] }}"
+   public_ip: "{{ hostvars['localhost']['public_ip'] }}"
+   public_dns: "{{ hostvars['localhost']['public_dns'] }}"
+   private_ip: "{{ hostvars['localhost']['private_ip'] }}"
+   provider: "{{ hostvars['localhost']['provider'] }}"
+   machine_type_node: "{{ hostvars['localhost']['machine_type_node'] }}"
+   remote_user: "{{ hostvars['localhost']['usuario_ssh_aws'] }}"
+  hosts: aws_instances_ips
+  become: yes
+  gather_facts: false
+  become_method: sudo
+  remote_user: "{{ hostvars['localhost']['usuario_ssh_aws'] }}"
+  roles:
+    - postinstall-hostpreparation-sem-ocp
 
