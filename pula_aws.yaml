@@ -1,0 +1,102 @@
+- hosts: all
+  vars:
+   ansible_ssh_private_key_file: /home/luciano/Documents/Workshops/GitHub/WorkshopOCPeAnsible/roles/postinstall-occlusterup/files/workshop_id_rsa
+  remote_user: centos 
+  become: yes
+  tasks:
+  - name: Garante que os pacotes essenciais estao presentes
+    yum:
+     name: "{{ item }}"
+     state: latest
+    with_items:
+     - vim 
+     - wget 
+     - git 
+     - bash-completion 
+     - docker 
+     - ansible
+  - name: Inicia e habilita docker
+    service:
+     name: docker
+     state: started
+     enabled: yes
+
+  - name: Instala repositorio para openshift
+    yum:
+     name: centos-release-openshift-origin37
+     state: latest
+
+  - name: Instala oc clients
+    yum: 
+     name: origin-clients
+     state: latest
+
+  - name: Muda arquivo config docker
+    lineinfile: 
+     path: /etc/sysconfig/docker
+     regexp: "^OPTIONS"
+     line: "OPTIONS='--selinux-enabled --log-driver=journald --signature-verification=false --insecure-registry 172.30.0.0/16'"
+
+  - name: Restarta docker
+    service:
+     name: docker
+     state: restarted
+  
+  - name: "Copia o remove tudo 1"
+    copy:
+     src: "assets/remove_tudo_1.sh"
+     dest: "/tmp/remove_tudo_1.sh"
+     mode: 0755
+
+  - name: "Copia o remove tudo 2"
+    copy:
+     src: "assets/remove_tudo_2.sh"
+     dest: "/tmp/remove_tudo_2.sh"
+     mode: 0755
+
+  - name: "Toda o remove tudo 1"
+    shell: "/tmp/remove_tudo_1.sh"
+    ignore_errors: yes
+
+  - name: "Toda o remove tudo 2"
+    shell: "/tmp/remove_tudo_2.sh"
+    ignore_errors: yes
+
+  - name: Checa se docker subiu
+    service:
+     name: docker
+     state: started
+
+  - name: Seta Variaveis
+    set_fact:
+     ip_publico: "{{ hostvars[inventory_hostname].ec2_ip_address }}"
+     dns_publico: "{{ hostvars[inventory_hostname].ec2_public_dns_name }}"
+    tags:
+     - occlusterup
+
+  - name: Copia arquivo de start do cluster up
+    template:
+     src: assets/clusterup.j2
+     dest: /root/clusterup.sh
+     mode: 0755   
+    tags: 
+     - occlusterup 
+
+  - name: Sobe Oc cluster up
+    shell: "/root/clusterup.sh"
+    tags:
+     - occlusterup
+
+  - name: Copia fix.yaml
+    copy: 
+     src: assets/fix.yml
+     dest: /root/fix.yml
+    tags: 
+     - fix
+
+  - name: Remove arquivo fix.yaml
+    file:
+     path: /root/fix.yaml
+     state: absent
+    tags: 
+     - fix
