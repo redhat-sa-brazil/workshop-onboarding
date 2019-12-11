@@ -220,6 +220,10 @@
     shell: "/usr/local/bin/oc get route wetty-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $2}'"
     register: result_url_wetty
 
+  - name: Aguardando pod do wetty subir...
+    pause: 
+      seconds: 10
+    
   - name: Obtem nome do pod wetty
     shell: "/usr/local/bin/oc get pod -l app=wetty-{{ user }} --no-headers -n {{ nome_projeto_openshift }} | awk '{print $1}'"
     register: result_url_pod_wetty
