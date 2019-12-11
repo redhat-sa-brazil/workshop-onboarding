@@ -319,7 +319,14 @@
 # FIM AWS
 # ========================================
 
-
+  - name: Grava IP da instancia na variavel ip_publico quando nao e criada instancia
+    set_fact:
+      ip_publico: 127.0.0.1
+      ip_server1: 127.0.0.1
+      ip_server1_publico: 127.0.0.1
+      ip_server2: 127.0.0.1
+      ip_server2_publico: 127.0.0.1
+    when: create_student_instance == "N"
 
   - name: Login no cluster Openshift
     shell: "export KUBECONFIG=/tmp/kube.cfg; /usr/local/bin/oc login {{ cluster_openshift }} --token={{ token_openshift }} --insecure-skip-tls-verify"
