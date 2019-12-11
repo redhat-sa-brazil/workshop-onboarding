@@ -14,7 +14,7 @@
     master_private_ip: ""
     infranode_private_ip: ""
     node1_private_ip: ""
-    machine_type_node_aws: t2.xlarge
+    machine_type_node_aws: t2.2xlarge
     region_aws: sa-east-1
     image_aws:   ami-cb5803a7
     pwd_alias: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
