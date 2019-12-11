@@ -57,21 +57,21 @@
    path: "/home/{{ remote_user }}/ocp-playbooks/openshift/docker-storage-setup"
    regexp: "^DEVS="
    line: "DEVS=/dev/xvdb"
-  when: machine_type_node == "t2.2xlarge"
+  
 
-- name: Troca device do docker AWS t3
-  lineinfile:
-   path: "/home/{{ remote_user }}/ocp-playbooks/openshift/docker-storage-setup"
-   regexp: "^DEVS="
-   line: "DEVS=/dev/nvme1n1"
-  when: machine_type_node == "t3.2xlarge"
+#- name: Troca device do docker AWS t3
+#  lineinfile:
+#   path: "/home/{{ remote_user }}/ocp-playbooks/openshift/docker-storage-setup"
+#   regexp: "^DEVS="
+#   line: "DEVS=/dev/nvme1n1"
+  #when: machine_type_node == "t3.2xlarge"
 
-- name: Troca device do docker para GCE
-  lineinfile:
-   path: "/home/{{ remote_user }}/ocp-playbooks/openshift/docker-storage-setup"
-   regexp: "^DEVS="
-   line: "DEVS=/dev/sdb"
-  when: machine_type_node == "n1-standard-8"
+#- name: Troca device do docker para GCE
+#  lineinfile:
+#   path: "/home/{{ remote_user }}/ocp-playbooks/openshift/docker-storage-setup"
+#   regexp: "^DEVS="
+#   line: "DEVS=/dev/sdb"
+#  when: machine_type_node == "n1-standard-8"
 
 
 - name: Copia chave
