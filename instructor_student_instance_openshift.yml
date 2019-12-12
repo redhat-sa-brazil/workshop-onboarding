@@ -126,6 +126,7 @@
          assign_public_ip: yes
          instance_tags:
           Name: "openshift-{{ user }}"
+          kubernetes.io/cluster/openshift: shared
          volumes:
           - device_name: /dev/sda1
             volume_type: gp2
